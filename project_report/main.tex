@@ -1,8 +1,11 @@
-\documentclass[a4paper, 12pt]{article}
-\usepackage[a4paper, total={6in,8in}]{geometry}
+\documentclass[a4paper, onecolumn, 12pt]{article}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage[english]{babel}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{setspace}
 \usepackage{parskip}
+\hyphenation{e-qua-tions the-o-ret-i-cal 
+ar-chi-tec-ture di-men-sion-al} %Do not worry about this
 \usepackage{hyperref}
 \hypersetup{
     colorlinks=true,
@@ -20,20 +23,31 @@
 Partial differential equations (PDEs) are essential components for modelling different processes and systems in various scientific and engineering areas. To predict the behavior of a certain system, one needs to solve or simulate the PDEs that describe that system. However, obtaining an analytical solution to PDEs is a difficult task in most practical situations, especially in the case of nonlinear or high dimensional PDEs. Due to the rapid evolution and advancements in the field of deep learning, researchers are starting to use deep neural networks (DNN) to approximate the solution of PDEs. Different models have been developed to perform this task such as Physics-Informed Neural Networks (PINNs) and Neural Operator. The speed and the efficiency of these models can surpass other common solvers such as Finite Elements (FM), Finite Difference (FD), and spectral methods in certain cases. In this project, we will utilize these deep learning models to solve an industry-related problem that requires PDEs approximation and compare the accuracy of the used method against experimental or simulated data obtained through other available solvers.
 
 \section*{Introduction}
-Due to the increase power of computation and the success of deep learning models to solve different problems in various fields such as computer vision, pattern recognition, and natural language and speech processing, researchers were inspired to apply deep neural network to solve problems in the field of scientific computing. One of the common and challenging problems is the problem of solving partial differential equations (PDEs). Different systems and processes are modelled by PDEs whether it is a natural system such as modelling a biological or a physical phenomena, or whether it is not a natural system such as simulating socioeconomic or financial models. Deep learning-based PDEs solver surpass classical methods such as finite element or finite difference in certain cases. One of them is the case of high dimensional PDEs since classical solvers require discretizing the PDEs' domain into a mesh, which causes the number of computations to increase exponentially with the increase of the dimensions and this is known as the curse of dimensionality. On the other hand, deep learning models are mesh-free models and they only require training data from the PDEs domain. Other situations where deep neural networks exceeds the traditional solvers is when the PDE is nonlinear or non-smooth, which makes it difficult to discretize. 
+Due to the increase power of computation and the success of deep learning models to 
+solve different problems in various fields such
+as computer vision, pattern recognition, and natural language and speech processing, 
+researchers were inspired to apply deep neural network to solve problems in the field of scientific computing. 
+One of the common and challenging problems is the problem of solving partial differential equations (PDEs). Different systems and processes are modelled by PDEs whether it is a natural system such as modelling a biological or a physical phenomena, or whether it is not a natural system such as simulating socioeconomic or financial models. Deep learning-based PDEs solver surpass classical methods such as finite element or finite difference in certain cases. One of them is the case of high dimensional PDEs since classical solvers require discretizing the PDEs' domain into a mesh, which causes the number of computations to increase exponentially with the increase of the dimensions and this is known as the curse of dimensionality. On the other hand, deep learning models are mesh-free models and they only require training data from the PDEs domain. 
+Other situations where deep neural networks exceeds the traditional solvers is when the PDE is nonlinear or non-smooth, which makes it difficult to discretize. 
 
 Physics-informed Neural Network (PINN) is the most basic and widely used model for approximating PDEs' solutions. PINN is unsupervised learning model since it does not require labelled data to learn the approximated function or solution. Similar to the to the fully connected neural network, the physics-informed neural network consists of an input layer, hidden layers, and an output layer. First, the input layer is used to feed the training data into the neural network.  Then, the hidden layers map the data to higher dimensions though a series of of linear transformation followed by a nonlinear activation function. Finally, the hidden layers map the data to the output layer, which provides the output of the approximated function. The physics-informed neural network (PINN) updates the learning parameters by minimizing a loss function that takes into account the losses due the boundary and initial conditions as well as the PDEs' residual. After the training process, the neural network should be able to approximate a function that obeys the laws provided by the PDEs. Therefore, the procedure of including the PDEs' residual helps to restrict the number of possible solutions. 
 
-Another famous model, which has been developed recently, is the Neural Operator model. What makes neural operators different from physics-informed neural networks (PINNs) is that the former learns a mapping between infinite function spaces unlike PINN where the mapping occurs between finite spaces or sets. This enables neural operators to learn an operator instead of a function and hence the name Neural Operator. The key difference between PINN and neural operators in terms of architecture is that the hidden layers in neural operators consist of linear operators, usually integral operators, followed by a nonlinear activation function. Therefore, neural operators are considered a generalization of physics-informed neural network.
+Another famous model, which has been developed recently, is the Neural Operator model. 
+What makes neural operators different from physics-informed neural networks (PINNs) is that the former learns a mapping between infinite function spaces unlike PINN where the mapping occurs between finite spaces or sets. 
+This enables neural operators to learn an operator instead of a function and hence the name Neural Operator.
+The key difference between PINN and neural operators in terms of architecture is that the hidden layers in neural operators consist of linear operators, usually integral operators, followed by a nonlinear activation function. Therefore, neural operators are considered a generalization of physics-informed neural network.
 
-Overall, deep learning methods for PDEs are powerful solvers. They have the potential for resolving various problems and challenges faced by the classical methods. The advantage of neural networks models is that they are mesh-free methods, which enables them to approximate the solution for nonlinear, non-smooth, and high dimensional PDEs without suffering from the cures of dimensionality. Furthermore, they utilize the algorithm of automatic differentiation to compute the residual of the PDEs. The algorithm is implemented by the majority of deep learning libraries, which makes the overall implementation process simple and easy. 
+Overall, deep learning methods for PDEs are powerful solvers. 
+They have the potential for resolving various problems and challenges faced by the classical methods. 
+The advantage of neural networks models is that they are mesh-free methods, which enables them to approximate the solution for nonlinear, non-smooth, and high dimensional PDEs without suffering from the cures of dimensionality. Furthermore, they utilize the algorithm of automatic differentiation to compute the residual of the PDEs. The algorithm is implemented by the majority of deep learning libraries, which makes the overall implementation process simple and easy. 
 
 \newpage
 \section*{Outlines}
 \begin{itemize}
     {\item \textbf{Literature Review} {\footnotesize(in progress)}}
 
-    Searching the literature to get a better and clearer understanding of the theoretical and the applied aspects of the to topic. This will also helps us to determine a relevant industrial problem.
+    Searching the literature to get a better and clearer understanding of the theoretical 
+    and the applied aspects of the to topic. This will also helps us to determine a relevant industrial problem.
 
     {\item \textbf{Establishing Connection with Industry}
     {\footnotesize(in progress)}}
@@ -81,6 +95,5 @@ element method? arXiv preprint arXiv:2302.04107.
 [4] Cuomo, S., Di Cola, V. S., Giampaolo, F., Rozza, G., Raissi, M., \& Piccialli, F. (2022). Scientific machine learning through physics–informed Neural Networks: Where we are and what’s next. Journal of Scientific Computing, 92(3). \url{https://doi.org/10.1007/s10915-022-01939-z} 
 
 [5] Hao, Z., Liu, S., Zhang, Y., Ying, C., Feng, Y., Su, H., \& Zhu, J. (2023, March 7). Physics-informed Machine Learning: A Survey on problems, methods and applications. arXiv.org. \url{http://dx.doi.org/10.48550/arXiv.2211.08064}
-\bibliography{ref}
 
 \end{document}
