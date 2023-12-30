@@ -7,3 +7,5 @@ project_report/*.gz
 project_report/*.fdb_latexmk
 project_report/*.fls
 .DS_Store
+project_report/.vscode/
+project_report/main.blg
