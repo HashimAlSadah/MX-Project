@@ -1,0 +1,9 @@
+\begin{thebibliography}{1}
+
+\bibitem{PIDeeponet2021}
+Sifan Wang, Hanwen Wang, and Paris Perdikaris.
+\newblock Learning the solution operator of parametric partial differential
+  equations with physics-informed deeponets.
+\newblock {\em CoRR}, abs/2103.10974, 2021.
+
+\end{thebibliography}
