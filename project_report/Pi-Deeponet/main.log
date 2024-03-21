@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.2.22)  20 MAR 2024 22:49
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.2.22)  21 MAR 2024 15:03
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -441,24 +441,61 @@ File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 {C:/Users/abd-_/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map} <./images/KFUPM_LOGO.png>] [2
 
 
-] [3] (main.bbl) [4] (main.aux (cover-page.aux))
+] [3] [4] [5]
+Overfull \hbox (15.44768pt too wide) detected at line 216
+\OML/cmm/m/it/12 G[]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 f[]\OT1/cmr/m/n/12 )(\OML/cmm/m/it/12 p[]\OT1/cmr/m/n/12 ) = \OML/cmm/m/it/12 u[]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 p[]\OT1/cmr/m/n/12 ) = [] \OMS/cmsy/m/n/12 ^^A [] \OT1/cmr/m/n/12 = [] \OML/cmm/m/it/12 u[]b[]
+ []
+
+<./images/pideeponet_case1_result.png, id=46, 642.4803pt x 281.853pt>
+File: ./images/pideeponet_case1_result.png Graphic file (type png)
+<use ./images/pideeponet_case1_result.png>
+Package pdftex.def Info: ./images/pideeponet_case1_result.png  used on input line 226.
+(pdftex.def)             Requested size: 433.62pt x 190.22966pt.
+[6]
+<./images/pideeponet_case2_result.png, id=54, 642.4803pt x 281.853pt>
+File: ./images/pideeponet_case2_result.png Graphic file (type png)
+<use ./images/pideeponet_case2_result.png>
+Package pdftex.def Info: ./images/pideeponet_case2_result.png  used on input line 241.
+(pdftex.def)             Requested size: 433.62pt x 190.22966pt.
+ [7
+pdfTeX warning (ext4): destination with the same identifier (name{figure.1}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.245 
+       <./images/pideeponet_case1_result.png>]
+<./images/pideeponet_case3_result.png, id=63, 642.4803pt x 281.853pt>
+File: ./images/pideeponet_case3_result.png Graphic file (type png)
+<use ./images/pideeponet_case3_result.png>
+Package pdftex.def Info: ./images/pideeponet_case3_result.png  used on input line 256.
+(pdftex.def)             Requested size: 433.62pt x 190.22966pt.
+ [8
+pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.260 \section
+              *{CONCLUSION} <./images/pideeponet_case2_result.png>] [9
+pdfTeX warning (ext4): destination with the same identifier (name{figure.3}) has been already used, duplicate ignored
+<argument> ...shipout:D \box_use:N \l_shipout_box 
+                                                  \__shipout_drop_firstpage_...
+l.269 \newpage
+               <./images/pideeponet_case3_result.png>] [10] (main.bbl) [11] (main.aux (cover-page.aux))
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-13>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 13669 strings out of 474461
- 218926 string characters out of 5742862
- 1932998 words of memory out of 5000000
- 35717 multiletter control sequences out of 15000+600000
- 568859 words of font info for 105 fonts, out of 8000000 for 9000
+ 13756 strings out of 474461
+ 220683 string characters out of 5742862
+ 1938998 words of memory out of 5000000
+ 35760 multiletter control sequences out of 15000+600000
+ 570122 words of font info for 119 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 89i,6n,93p,1071b,463s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 89i,8n,93p,1071b,463s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/abd-_/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/abd-_/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/abd-_/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/abd-_/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/abd-_/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/abd-_/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/abd-_/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/abd-_/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/abd-_/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/abd-_/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on main.pdf (4 pages, 253821 bytes).
+Output written on main.pdf (11 pages, 389764 bytes).
 PDF statistics:
- 87 PDF objects out of 1000 (max. 8388607)
- 11 named destinations out of 1000 (max. 500000)
- 22534 words of extra memory for PDF output out of 24883 (max. 10000000)
+ 137 PDF objects out of 1000 (max. 8388607)
+ 29 named destinations out of 1000 (max. 500000)
+ 26645 words of extra memory for PDF output out of 29859 (max. 10000000)
 

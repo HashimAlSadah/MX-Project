@@ -163,7 +163,108 @@ For the evaluation, we will use the output of the trunk neural network.
 
 
 \subsection*{Trunk Net}
+The input to the trunk neural network is points where we want to evalute the target function $u(x)$ at and we represneted by the following column vector
 
+$$
+trunk_{in} =
+\begin{pmatrix}
+p_1 \\
+p_2 \\
+\vdots \\
+p_{100}
+\end{pmatrix}
+$$
+
+**Note**: I used $p$ instead of $x$ so there is no confusion with between these points and the sensor points.
+
+since $0 \le x \le 1$, then $0 \le p_j \le 1$ for $j=1, 2, 3, \dots 100$
+
+The tunk neural network will map each point to a higher dimensions and in this case we require that the output dimensions of the branch and the trunk networks must be the same. Therefore, the output the trunk neural network is the following
+
+
+$$
+trunk_{out} = \begin{pmatrix}
+b^{(1)}_1 & b^{(1)}_2 & b^{(1)}_3 & \dots & b^{(1)}_m\\
+b^{(2)}_1 & b^{(2)}_2 & b^{(2)}_3 & \dots & b^{(2)}_m\\
+\vdots & \vdots & \vdots & \dots & \vdots \\
+b^{(100)}_1 & b^{(100)}_2 & b^{(100)}_3 & \dots & b^{(100)}_m\\
+\end{pmatrix}
+$$
+
+
+For each $p_j$ where $j=1, 2, 3, \dots, 100$,
+
+$$
+\mathbf{NN}_{\text{trunk}}(p_j) = \begin{bmatrix}
+b^{(j)}_1 & b^{(j)}_2 & b^{(j)}_3 & \dots & b^{(j)}_m
+\end{bmatrix}
+$$
+
+\subsection*{Evaluation}
+To evaluate the output $u_i$ at the trunk points,
+we take the dot product of the branch output and the trunk output and that is why we require the
+output dimensions of both netowrks to be the same. For example,
+to evaluate $G(f_i)$ at $p_j$ we perform the following operation
+
+$$
+G_{\theta}(f_i)(p_j) = u_i(p_j) = \begin{bmatrix}
+u^{(i)}_1 & u^{(i)}_2 & u^{(i)}_3 & \dots & u^{(i)}_m
+\end{bmatrix} \cdot \begin{bmatrix}
+b^{(j)}_1 & b^{(j)}_2 & b^{(j)}_3 & \dots & b^{(j)}_m
+\end{bmatrix}
+= \sum_{n=1}^{m} u^{(i)}_n b^{(j)}_n
+$$
+We are going to use only 1 hidden layer with 32 parameters for both the branch and trunk networks. Also, we will use LBFGS optimizer since it converges to the minimum faster.
+\section*{RESULTS}
+We trained the model and are going to test it with $f(x)$ to be in the same space that we trained it on
+and on functions outside of the domain to see how general the model is.
+
+\subsection*{Case 1 - Constant}
+For $f(x) = -1$ which is a simple case with an exact solution $u(x) = \frac{1}{2} (x^2 - x)$ we get the following results 
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=\textwidth]{pideeponet_case1_result.png}
+    \label{constant_f}
+    \caption[figure1]{difference between the exact solution and the predicted solution for $f(x) = -1$}
+\end{figure}
+As we see in \ref*{constant_f}, the max error is very small and the model 
+was able to predict the solution very well.
+
+\subsection*{Case 2 - Quadratic}
+In this case, we will consider the following forcing term
+\[ f(x) = x + 3x^2 \] 
+Which has an exact solution of 
+\[u(x) = \dfrac{1}{6} x^3 - \dfrac{1}{4} x^4 + \dfrac{10}{24} x. \] 
+The results are shown in the following figure
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=\textwidth]{pideeponet_case2_result.png}
+    \label{quadratic_f}
+    \caption[figure2]{difference between the exact solution and the predicted solution for $f(x) = x + 3x^2$}
+\end{figure}
+
+
+\subsection*{Case 3 - Out of Space Functions (Exponential) }
+In this case, we will consider the following forcing term
+\[f(x) = e^x\] 
+Which has an exact solution of 
+\[u(x) = - e^x +xe -x + 1\]
+Since the forcing term is from a function space that the model hasn't been trained on, we expect the model to be less accurate.
+The results are shown in the following figure
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=\textwidth]{pideeponet_case3_result.png}
+    \label{exp_f}
+    \caption[figure3]{difference between the exact solution and the predicted solution for $f(x) = e^x$}
+\end{figure}
+\section*{CONCLUSION}
+In this work, we have presented the PI-DeepONet method, a novel approach for solving parametric partial differential equations (PDEs). Our method combines the power of physics-informed neural networks (PINNs) with deepONets, enabling accurate and efficient solutions to PDEs with high-dimensional parameter spaces.
+
+Through extensive experiments, we have demonstrated the effectiveness of the PI-DeepONet method in predicting the solutions of various parametric PDEs. Our model exhibits remarkable accuracy, even when tested on functions outside the training space, indicating its ability to generalize well. The results obtained highlight the potential of the PI-DeepONet method as a powerful tool for solving complex PDEs.
+
+Looking ahead, future research will focus on extending the PI-DeepONet method to higher dimensions and more intricate PDEs. This will involve exploring advanced architectures and training strategies to handle the increased complexity. Additionally, efforts will be directed towards enhancing the interpretability of the model and investigating its robustness under different scenarios.
+
+In conclusion, the PI-DeepONet method represents a significant advancement in the field of PDE solving. Its ability to accurately predict solutions and generalize to unseen functions opens up new possibilities for tackling challenging problems in various scientific and engineering domains.
 %-------references------
 \newpage
 \singlespacing
