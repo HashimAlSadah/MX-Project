@@ -14,6 +14,7 @@
 \usepackage{hyperref}
 \usepackage{float}
 
+
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
@@ -171,7 +172,7 @@ defined as the following.
 \end{equation}
 Where $N_c$ are the collocation points, which are points within the domain $\Omega$
 
-Eq. \ref{pde loss} is formulated as above since we are requiring the left-hand side of 
+(\ref{pde loss}) is formulated as above since we are requiring the left-hand side of 
 $$
 \mathcal{F}(u)(\mathbf{x}) = f(\mathbf{x})  \Rightarrow 
 \mathcal{F}(u)(\mathbf{x}) - f(\mathbf{x}) = 0
@@ -184,7 +185,7 @@ $\mathcal{L}_{\mathcal{D}}(\theta)$.
 \mathcal{L}_{\mathcal{B}}(\theta) = MSE_{\mathcal{B}} 
 = \frac{1}{N_b} \sum_{j=1}^{N_b} \bigg| \mathcal{B}(u_\theta)(x, t_j) - g(t_j) \bigg|^2
 \end{equation}
-\textbf{Note:} Eq. \ref{boundary loss} shows the boundary condition loss for one point in space $x$ 
+\textbf{Note:} (\ref{boundary loss}) shows the boundary condition loss for one point in space $x$ 
 at different time $t_j$. 
 
 \begin{equation}
@@ -198,12 +199,13 @@ at different time $t_j$.
 \end{equation}
 Where $u_i$ is a labeled example or data.
 
-\subsection{PDE with PINN}
+\subsection{Continuous model}
+\subsubsection{Linear PDE example}
 To demonstrate the ability of PINN to approximate the solution of a PDE, we 
 consider the following heat or diffusion equation.
 \begin{equation}
 \frac{\partial u}{\partial t} = \frac{\partial^2 u}{\partial x^2}
-- e^{-t} \sin{(\pi x)} (1 - \pi^2), \quad -1 < x < 1
+- e^{-t} \sin{(\pi x)} (1 - \pi^2), \quad -1 < x < 1, \quad 0 < t \le 1
 \end{equation} 
 Subject to the following boundary conditions
 \begin{equation}
@@ -216,7 +218,7 @@ u(x, t=0) = \sin(\pi x)
 
 The exact solution for the problem is 
 \begin{equation}
-u(x, t) = e^{-t} \sin(\pi x), \quad -1 \le x \le 1
+u(x, t) = e^{-t} \sin(\pi x), \quad -1 \le x \le 1, \quad 0 \le t \le 1
 \end{equation}
 
 To solve the problem, we have discretized the x-axis and the time into $30$ points each.
@@ -271,49 +273,649 @@ algorithm of stochastic gradient descent.
 
 Figure \ref{absolute diff} shows the difference between the exact solution 
 in Figure \ref{exact diff} and the neural network approximation in Figure \ref{approximation diff}
-where it indicates a global error of order $10^-2$ after 15000 iterations.
+where it indicates a global error of order $10^-2$ after 15000 iterations. The code and the simulation
+details are on \href{https://github.com/HashimAlSadah/MX-Project/blob/main/PINN/continuous_time_model/PDE_diffusion_PINN.ipynb}
+{GitHub}.
 
-\newpage
-\section*{Outlines}
-\begin{itemize}
-    {\item \textbf{Literature Review} {\footnotesize(partially done)}}
+\subsubsection{Nonlinear PDE example}
+Consider the following nonlinear PDE, Burgers' equation
+\begin{equation}
+\frac{\partial u(x,t)}{\partial t} 
+= -u(x,t)\frac{\partial u(x,t)}{\partial x} 
++ \nu \frac{\partial^2 u(x,t)}{\partial x^2}, \quad x \in [-1, 1], \quad t \in [0, 1]
+\end{equation}
+Where $\nu$ is the diffusion coefficient. For our example, we will use $\nu = 0.01 / \pi$.
 
-    Searching the literature to get a better and clearer understanding of the theoretical 
-    and the applied aspects of the topic. This will also help us to determine a relevant industrial problem.
+The PDE is subject to the following initial and boundary conditions.
+\begin{equation}
+\begin{aligned}
+&u(x, 0) = -sin(\pi x), \\
+&u(-1, t) = u(1, t) = 0
+\end{aligned}
+\end{equation}
 
-    {\item \textbf{Establishing Connection with Industry}
-    {\footnotesize(in progress)}}
+\textbf{Reference solution}\\
+It is possible to obtain the analytical solution for Burgers equation for a 
+restricted set of initial conditions functions, $u(x,t=0) = g(x)$. This can be done by 
+using the Cole-Hopf transformation, which is a nonlinear transformation\cite{kutluay1999numerical}.
+\begin{equation}
+u(x, t) = -2 \nu \frac{\theta_x}{\theta} = -2 \nu \log[\theta(x,t)]
+\end{equation}
+This transformation turns the nonlinear Burgers PDE into the heat equation
+\begin{equation}
+\theta_t = \nu \theta_{xx}
+\end{equation}
+For the purpose of making the code general when changing the initial conditions (or even the boundary conditions), 
+we are going to use the explicit finite difference (conditionally stable) to approximate the solution for 
+Burgers equation and that approximation will be our reference solution.
 
-    We are currently trying to contact potential companies and organization in order get an industrial 
-    support and insight for the project. We are also, trying to find suitable industrial advisor 
-    that has an experience in the related field.
+\textbf{Finite difference discretization}\\
+We will discretize the x-dimension into $n$ sub-intervals with $n+1$ points using a step size of $\Delta x = h$
+$$
+x_i = x_0 + ih, \quad x_0 = -1, \quad i = 0, 1, 2, \dots, n.
+$$  
 
-    {\item \textbf{Reproducing Previous work} {\footnotesize(partially done)}}
+The time will be discretized using a step of $\Delta t = k$.
+$$
+t_j = t_0 + jk, \qquad t_0 = 0, \quad j = 0, 1, 2, \dots
+$$
 
-    In order to deepen our understanding of the topic and have more confidence in our work and implementation, 
-    we are trying to produce some the previous work in the literature.
+For the first derivative in time, we are going to use the forward difference (since it explicit). 
+For the x-axis discretization, we are going to use the central difference for the first and the second derivative.
+$$
+u_t \approx \frac{u_{i,j+1} - u_{i, j-1}}{k}, \quad
+u_x \approx \frac{ u_{i+1,j} - u_{i-1,j} }{2h}, \quad
+u_x \approx \frac{ u_{i+1,j} - 2 u_{i,j} + u_{i-1,j} }{h^2}
+$$
 
-    {\item \textbf{Solving the Main problem }}
-    
-    At this stage, we should be able to apply the skills and the methods that 
-    we have searched about and developed to solve the industrial problem.
+The discretized equation is the following
+\begin{equation}
+\frac{u_{i,j+1} - u_{i, j-1}}{k} =
+- u_{i,j} \left( \frac{ u_{i+1,j} - u_{i-1,j} }{2h} \right)
++ \nu \left( \frac{ u_{i+1,j} - 2 u_{i,j} + u_{i-1,j} }{h^2} \right)
+\end{equation}
 
-     {\item \textbf{Validating the Results }}
+Rearrange
+\begin{multline}
+u_{i,j+1}  = u_{i, j-1}
+- k u_{i,j} \left( \frac{ u_{i+1,j} - u_{i-1,j} }{2h} \right)
++ k \nu \left( \frac{ u_{i+1,j} - 2 u_{i,j} + u_{i-1,j} }{h^2} \right)
+\\ \text{for} \quad i=1, 2, \dots, n-1,  \quad j = 1, 2, \dots
+\end{multline}
 
-     After solving the problem, we need to validate our results by analyzing the obtained data.
+The initial and boundary points are the following
+$$
+u_{i,0} = \sin(\pi x_i), \qquad u_{0,j} = u_{n,j} = 0
+$$
 
-    {\item \textbf{Demonstration}} 
+\begin{figure}
+    \centering
+    \includegraphics[width=300px]{images/FD_burgers_pde.png}
+    \vspace{-1em}
+    \caption{Finite difference approximation}
+    \label{fd_burgers}
+\end{figure}
 
-    Preparing a demonstration to advertise or show the applicability of the project to solve actual problems. 
-    This also includes preparing a poster, a report, and a presentation.
+Figure \ref{fd_burgers} shows the finite difference approximation of burgers' equation.
 
-    {\item \textbf{Submitting the Project}} 
-    
-    At this stage, we should make a final review and corrections if necessary before the final submission. 
-\end{itemize}
+Let $\tilde{u}(x,t)$ be the approximated solution by the neural network. 
+Furthermore, rearrange Burgers equation and define the following function
+\begin{equation}
+f(x,t) = \tilde{u}_t + \tilde{u} \tilde{u}_x - \nu \tilde{u}_{xx}
+\end{equation}
+
+Since we know that $f(x,t) = 0$, we can use this in our loss function, which is usually 
+taken as the mean square error between the predicted and the true values.
+\begin{equation}
+MSE_{PDE} = \frac{1}{N_f} \sum_{i=1}^{N_f} \Big|f(x_i, t_i)\Big|^2
+\end{equation}
+
+Since $x\in [-1,1]$ and $t\in [0,1]$ then the collocation points are defined over 
+the domain $(x_i, t_i) \in [-1,1] \, \times \, [0,1]$. $N_f$ is the number of collocation points.
+
+Similarly, we can define the loss due to the initial and boundary points.
+\begin{equation}
+MSE_{0} = \frac{1}{N_0} \sum_{i=1}^{N_0} \Big| \tilde{u}(x_i, t=0) + \sin(\pi x_i)\Big|^2
+\end{equation}
+Where $N_0$ is the number of initial points.
+
+\begin{equation}
+\begin{aligned}
+&MSE_{lb} = \frac{1}{N_{lb}} \sum_{i=1}^{N_{lb}} \Big| \tilde{u}(x=-1, t_i) \Big|^2 \\
+&MSE_{rb} = \frac{1}{N_{rb}} \sum_{i=1}^{N_{rb}} \Big| \tilde{u}(x=1, t_i) \Big|^2
+\end{aligned}
+\end{equation}
+Where $N_{lb}$ and $N_{rb}$ are the number of left boundary and right boundary points, respectively.
+
+The loss function that we need to minimize is the sum of PDE, initial, and boundary losses. Therefore,
+\begin{equation}
+MSE = MSE_{PDE} + MES_{init} + MSE_{lb} + MSE_{rb}
+\end{equation}
+
+The neural network that was used to approximate the solution consists of 4 hidden layers
+with each layer containing 32 neurons. The total number of collocation or training points is $N_f=2500$.
+50 points from the spatial domain $[-1, 1]$ and 50 points from the temporal domain $[0, 1]$ and hence 
+$N_f = 50 \times 50 = 2500$. Similar to the example of the diffusion problem, the optimizer that was used 
+to minimize the loss function is the Adam optimizer with a learning rate of $10^{-4}$. Figure \ref{pinn_approx_burgers} 
+shows the model approximation after training the neural network for 20000 iterations and Figure \ref{abs_difference_burgers}
+shows the absolute difference between the FD solution and the PINN approximation.
+
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=300px]{images/NN_burgers_pde.png}
+    \vspace{-1em}
+    \caption{PINN approximation}
+    \label{pinn_approx_burgers}
+\end{figure}
+
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=300px]{images/abs_difference_burgers.png}
+    \vspace{-1em}
+    \caption{Absolute difference between FD and PINN}
+    \label{abs_difference_burgers}
+\end{figure}
+
+Since we have not used the 
+exact solution as our reference solution, we used the mean square error to compare the neural network approximation 
+with reference solution and the mean square error is approximately $0.0122$. The code and the details of the simulation
+are on \href{https://github.com/HashimAlSadah/MX-Project/blob/main/PINN/continuous_time_model/Continuous_time_PINN_Burgers_PDE.ipynb}
+{GitHub}.
+
+\subsection{Discrete-time model}
+Instead of using the PDE immediately as we did in the case of the continuous model, 
+we can perform a temporal discretization to the PDE using explicit/implicit Runge-Kutta method\cite{raissi2019physics}.
+Let us consider the following general PDE.
+\begin{equation}\label{main_discrete_time_eq}
+\frac{\partial u(x,t)}{\partial t} = g[u(x,t)], \quad x \in \Omega, \quad t \in [0, T]
+\end{equation}
+Where $u(x,t)$ is the desired solution, and $g[\cdot]$ is a spatial differential operator.
+
+Next, we apply a general Runge-Kutta scheme with q stages as with the following Butcher's tableau 
+$$
+\begin{array}{c|cccc}
+c_1 & a_{11} & a_{12} & \dots & a_{1q} \\ 
+c_2 & a_{21} & a_{22} & \dots & a_{2q} \\ 
+\vdots & \vdots & \vdots & \ddots & \vdots \\ 
+c_q & a_{q1} & a_{q2} & \dots & a_{qq} \\ 
+\hline
+& b_1 & b_2 & \dots & b_q
+\end{array}
+$$
+
+This would result in the following equations as defined in \cite{iserles2009first}.
+\begin{equation}\label{RK_discrt}
+\begin{aligned}
+& u_{n+c_i} = u_n + \Delta t \sum_{j=1}^{q} a_{ij} \, g[u_{n+c_j}] \qquad \text{for} \; i = 1, 2, \dots, q \\
+& u_{n+1} = u_n + \Delta t \sum_{j=1}^{q} b_j \, g[u_{n+c_j}] 
+\end{aligned}
+\end{equation}
+Where 
+$$\: u_{n+c_j} = u(t+c_j \Delta t, x) \qquad \text{for} j = 1, 2, \dots, q$$ 
+
+$u_{n + c_j}$ are the Runge-Kutta solutions or the intermediate solution and 
+$u_{n+1}$ is the solution at the next step in time $u_{n+1} = u(t + \Delta t, x)$.
+The neural network will take training points from the spatial domain as an input 
+and will output the intermediate solutions along with the solution at the next time step $t_{n+1}$.
+Therefore, the output layer will have $q+1$ neurons corresponding to the number of stages and the next 
+solution. 
+\begin{equation}\label{NN_RK_output}
+NN_{out} \rightarrow [u_{n+c_1}(x), u_{n+c_2}(x), \dots, \ u_{n+c_q}(x), u_{n+1}(x)]
+\end{equation}
+
+Given the approximated output of the neural network, we can compute the ap\-prox\-i\-mat\-ed previous solution 
+$u_{n}$ and the error between the approximated $u_n$ and the exact $u_n$, which is known.
+
+We can rearrange (\ref{RK_discrt}), so that we have our neural network output on one side and the 
+previous solution on the other side.
+
+\begin{equation}\label{RK_discrt_rearranged}
+\begin{aligned}
+& u_n = u_{n+c_i} -  \Delta t \sum_{j=1}^{q} a_{ij} \, g[u_{n+c_j}] 
+\qquad \text{for} \; i = 1, 2, \dots, q \\
+& u_n = u_{n+1} - \Delta t \sum_{j=1}^{q} b_j \, g[u_{n+c_j}] 
+\end{aligned}
+\end{equation}
+
+Since the previous steps in (\ref{RK_discrt_rearranged}) are the approximated, we will assign each one 
+them a unique identifier as the following.
+
+\begin{equation}\label{discrete_t_eqs}
+\begin{aligned}
+& u_n^{(i)} = u_{n+c_i} -  \Delta t \sum_{j=1}^{q} a_{ij} \, g[u_{n+c_j}] 
+\qquad \text{for} \; i = 1, 2, \dots, q \\
+& u_n^{(q+1)} = u_{n+1} - \Delta t \sum_{j=1}^{q} b_j \, g[u_{n+c_j}] 
+\end{aligned}
+\end{equation}
+Therefore, the physics-informed output is 
+\begin{equation}\label{phys_RK_output}
+NN_{phys} \rightarrow [u_{n}^{(1)}, u_n^{(2)}, \dots, u_n^{(q)}, u_n^{(q+1)}]
+\end{equation}
+
+\textbf{Note:} (\ref{NN_RK_output}) is the neural network output without applying any equation 
+and (\ref{phys_RK_output}) is the physics-informed output since we are applying (\ref{discrete_t_eqs})
+to obtain (\ref{phys_RK_output}). 
+
+For the purpose of implementation, it is better to write (\ref{discrete_t_eqs}) using vectors and 
+matrix notation.
+\begin{equation}
+\begin{bmatrix}
+    u_{n}^{(1)} \\ u_n^{(2)} \\ \vdots \\ u_n^{(q)} \\ u_n^{(q+1)}   
+\end{bmatrix}
+=
+\begin{bmatrix}
+u_{n+c_1} \\ u_{n+c_2} \\ \vdots \\ u_{n+c_q} \\ u_{n+1}
+\end{bmatrix}
+-
+\Delta t
+\begin{bmatrix}
+    a_{11} & a_{12} & \dots & \dots & a_{1q} \\
+    a_{21} & a_{22} & \dots & \dots & a_{2q} \\
+    \vdots & \vdots & \vdots & \vdots & \vdots \\
+    a_{q1} & a_{q2} & \dots & \dots & a_{qq} \\
+    b_{1} & b_{2} & \dots & \dots & b_{q} \\
+\end{bmatrix}
+\begin{bmatrix}
+g_1 \\ g_2 \\ \vdots \\ g_{q-1} \\ g_{q}
+\end{bmatrix}
+\end{equation}
+
+Where 
+$$g_j = g[u_{n+c_j}], \qquad  j = 1, 2, \dots, q$$
+
+Finally, we define the loss function, which is the mean square error between the exact and the approximated 
+solution of the previous step in time.
+\begin{equation}
+MSE_{n} = \frac{1}{N_x (q+1)} \sum_{j=1}^{N_x} \sum_{i=1}^{q+1} \Big| u_n^{(i)}(x_j) - u_n(x_j) \Big|^2
+\end{equation}
+Where $N_x$ is the number of nodes or training points from the domain $\Omega$ and $q$ is the number 
+of stages of Runge-Kutta method.
+
+\textbf{Note:} We have only defined a loss function for the inner points and not for the boundary
+points since we have not specified the geometry of the problem and the type of boundary conditions.
+However, the loss function for the boundary points $MSE_b$ can be defined depending on 
+the problem's specifications and the total loss will be $MSE = MSE_n + MSE_b$ as we will see in the following 
+example.  
+
+After training the neural network or the model we should be able to predict the solution $u(x, t + \Delta t)$
+at the next step in time $t_{n+1}$. To find the value of $u$ at $t_{n+2}$, we need to train the neural network
+again using the approximation that we have acquired at $t_{n}$. In other words, we have to implement a time marching 
+scheme. 
+
+An advantage of this method is that we could approximate the solution at the last time step in time $T$ immediately
+if we use an implicit Runge-Kutta. An implicit Runge-Kutta scheme with large number of stages will have a larger 
+stability region and hence one can use a greater step size to obtain the solution at the final step in one shot. 
+The same advantage can be a limitation in certain cases where we would like to observe how the simulated system 
+evolves in time, which may requires us to compute the solution using a small step.
+However, we can always use a time marching scheme to resolve this issue.
+
+\subsubsection{Linear PDE example}
+Consider the following diffusion equation 
+\begin{equation}\label{diffusion_discrete_time}
+\frac{\partial u(x,t)}{\partial t} = \frac{\partial^2 u(x,t)}{\partial x^2} - u(x, t),
+\quad 0 < x < 1, \quad 0 < t  \le 1
+\end{equation}
+
+Subject to the following boundary and initial conditions
+\begin{equation}
+u(x = 0, t) = u(x= 1, t) = 0, \quad t \ge 0
+\end{equation}
+\begin{equation}
+u(x, t=0) = sin(\pi x), \quad x \in [0, 1] 
+\end{equation}
+
+The exact solution is 
+\begin{equation}
+u(x,t) = sin(\pi x) e^{-(\pi^2 + 1)t}
+\end{equation}
+
+We write (\ref{diffusion_discrete_time}) in the form of (\ref{main_discrete_time_eq}) 
+by defining the following differential operator
+\begin{equation}
+g[u(x,t)] = \frac{\partial^2 u(x,t)}{\partial x^2} - u(x, t)
+\end{equation}
+
+For this problem, we are going to apply an implicit Runge-Kutta with three stages with following
+Butcher's tableau.
+\begin{equation}
+\begin{array}{c|ccc}
+    0 & \frac{1}{9} &  \frac{-1-\sqrt{6}}{18} &  
+    \frac{-1+\sqrt{6}}{18}\\[0.25em]
+    \frac{3}{5} - \frac{\sqrt{6}}{10} & \frac{1}{9} & \frac{11}{45} + 
+    \frac{7\sqrt{6}}{360} & \frac{11}{45} - \frac{43\sqrt{6}}{360} \\[0.25em]
+    \frac{3}{5} + \frac{\sqrt{6}}{10} & \frac{1}{9} &
+    \frac{11}{45} + \frac{43\sqrt{6}}{360} & \frac{11}{45} - \frac{7\sqrt{6}}{360}\\[0.25em]
+    \hline \\[-1em]
+    & \frac{1}{9} & \frac{4}{9} + \frac{\sqrt{6}}{26} &
+    \frac{4}{9} - \frac{\sqrt{6}}{26}
+    \end{array}
+\end{equation}
+
+Therefore, our linear system is 
+\begin{equation}
+\begin{bmatrix}
+u_n^{(1)} \\ u_n^{(2)} \\ u_n^{(3)} \\ u_n^{(4)} 
+\end{bmatrix}
+=
+\begin{bmatrix}
+u_{n+c_1} \\ u_{n+c_2} \\ u_{n+c_3} \\ u_{n+1} 
+\end{bmatrix}
+-
+\Delta t
+\begin{bmatrix}
+a_{11} & a_{12} & a_{13} \\
+a_{21} & a_{22} & a_{23} \\
+a_{31} & a_{32} & a_{33} \\
+b_{1} & b_{2} & b_{3} \\
+\end{bmatrix}
+\begin{bmatrix}
+g[u_{n+c_1}] \\ g[u_{n+c_2}] \\ g[u_{n+c_3}]
+\end{bmatrix}
+\end{equation}
+Where 
+$$
+\text{NN}_{out} = [u_{n+c_1}, u_{n+c_2}, u_{n+c_3}, u_{n+1}]
+$$
+$$
+\text{NN}_{phys} = [u_n^{(1)}, u_n^{(2)}, u_n^{(3)}, u_n^(4)]
+$$
+
+The loss function is defined as the following
+\begin{equation}
+MSE = MSE_n + MSE_b
+\end{equation}
+$MSE_n$ is the loss function for the points in the domain, $x \in (0, 1)$.
+\begin{equation}
+    MSE_n = \frac{1}{N_x  (q+1)}
+    \sum_{j=1}^{N_x} \sum_{i=1}^{q+1} \,
+    \Big| u^{(i)}_n(x_j) - u_n(x_j) \Big|^2
+\end{equation}
+
+$MSE_b$ is the loss function for the boundary points, $x=0$ and $x=1$.
+\begin{multline}
+MSE_b = \frac{1}{q} \left( \sum_{i=1}^{q} \Big| u_{n+c_i}(x=0) \Big|^2  \right)
++ \Big| u_{n+1}(x=0) \Big|^2 + \\
+\frac{1}{q} \left( \sum_{i=1}^{q} \Big| u_{n+c_i}(x=1) \Big|^2  \right)
++ \Big| u_{n+1}(x=1) \Big|^2
+\end{multline}
+Where $N_x$ is the number of training points and $q = 3$ is the number of Runge-Kutta stages.
+
+The neural network consists of 4 hidden layers and 64 hidden layers, and the optimizer used to
+minimize the loss function is the limited-memory BFGS (LBFGS), which is quasi-Newton method since 
+it approximates the Hessian matrix (the second partial derivative of the loss function). The time
+marching scheme applies a time step of $\Delta t = 0.01$ to obtain a smooth approximation and the number
+of training points is $N_x = 200$.
+
+Figure \ref{exact_approximation_diffusion_RK} shows the neural network approximation and the exact solution 
+and Figure \ref{abs_diff_disc_pinn_diffusion} shows the absolute difference between the exact and the approximated
+solutions, which indicates a global error of the order $10^3$. The details of the simulation are on 
+\href{https://github.com/HashimAlSadah/MX-Project/blob/main/PINN/discrete_time_model/Discrete_time_PINN_Diffusion_equation.ipynb}
+{GitHub repository}.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=420px]{images/diffusion_ex_app_dis_PINN.png}
+    \vspace{-1em}
+    \caption{Approximation and Exact solution of $u(x,t)$}
+    \label{exact_approximation_diffusion_RK}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=250px]{images/abs_difference_disc_PINN_diffusion.png}
+    \vspace{-1em}
+    \caption{Absolute difference of $u_{exact} - u_{approx}$}
+    \label{abs_diff_disc_pinn_diffusion}
+\end{figure}
+
+\clearpage
+\section{PI-DeepOnet}
+Physics Informed Deep Neural Operator (PI-DeepONet) is a new method of solving
+partial differential equations (PDEs) using deep learning. This method is
+based on the combination of the Physics Informed Neural Networks (PINNs)
+and the DeepONet. PINNs are a class of neural networks that are trained
+to solve PDEs by enforcing the PDEs as a loss function. DeepONet is
+a deep learning architecture that is used to solve PDEs by learning
+the solution operator. PI-DeepONet is a combination of these two 
+methods, which allows for the solution of PDEs with fewer data and 
+computational cost. This part
+will provide an overview of the PI-DeepONet method and its applications.
+
+In this section, we provide a concise overview of the DeepONet model architecture \cite{wang2021learning}, 
+focusing specifically on the learning of solution operators for parametric Partial Differential Equations
+(PDEs). The term "parametric PDEs" refers to PDE systems where certain parameters are permitted to vary 
+within a specified range. These parameters could include factors such as the shape of the physical domain,
+initial or boundary conditions, coefficients (constant or variable), and source terms. To address such 
+problems comprehensively, let $(U, V, S)$ be a triplet of Banach spaces, and $N: U \times S \rightarrow
+V$ be a differential operator, either linear or nonlinear. We examine parametric PDEs of the form 
+$N(u, s) = 0$ \cite{wang2021learning} where $u \in U$ represents the parameters (input functions),
+and $s \in S$ is the corresponding unknown solution to the PDE system. It is assumed that for any
+$u \in U$, there exists a unique solution $s = s(u) \in U$ to the equation $N(u, s) = 0$ (subject to
+appropriate initial and boundary conditions). Consequently, a solution operator $G: U \rightarrow S$ 
+is defined as $G(u) = s(u)$. Following the original formulation by Lu et al. \cite{wang2021learning}, 
+we represent the solution map $G$ using an unstacked DeepONet denoted as $G_{\theta}$, where $\theta$ 
+encompasses all trainable parameters of the DeepONet network. As depicted in Figure 1, the unstacked
+DeepONet comprises two separate neural networks, known as the "branch net" and "trunk net", respectively. 
+The branch net takes $u$ as input and produces a feature embedding $[b_1, b_2, ..., b_q]^T \in \mathbb{R}^q$
+as output, where $u = [u(x_1), u(x_2), ..., u(x_m)]$ denotes a function $u \in U$ evaluated at a set of 
+fixed locations $\{x_i\}_{i=1}^m$. On the other hand, the trunk net accepts continuous coordinates $y$ as
+inputs and generates a feature embedding $[t_1, t_2, ..., t_q]^T \in \mathbb{R}^q$ as output. The final 
+output of the DeepONet is obtained by merging the outputs of the branch and trunk networks via a dot 
+product. Specifically, the DeepONet prediction $G_{\theta}(u)(y)$ for a function $u$ evaluated at $y$
+is expressed as:
+
+\begin{equation}
+G_{\theta}(u)(y) = \sum_{k=1}^{q} b_k(u(x_1), u(x_2), ..., u(x_m)) \cdot t_k(y),
+\end{equation}
+
+where $\theta$ represents the collection of all trainable weight and bias parameters in the branch and trunk networks. 
+These parameters are optimized by minimizing the mean square error loss given by:
+$$
+\mathcal{L}_{ODE} = \frac{1}{m} \sum_{j=1}^{m}
+\left(
+-\frac{d^2 G_{\theta}(f)(p_j)}{dp^2} - f(p_j)
+\right)^2_{p=x}
+$$
+
+Where $G_{\theta}(f)=u_{\theta}$ and $p_j$ is an input point to the trunk NN.
+\subsection{IMPLEMENTATION}
+We will consider the 1D Poisson equation as a case study to 
+illustrate the im\-ple\-men\-ta\-tion of the PI-DeepONet method. The 1D Poisson equation is given by:
+$$
+-\frac{d^2 u}{d x^2} = f(x), \quad 0 \le x \le 1
+$$
+
+Subject to the boundary conditions
+$$
+u(0) = u(1) = 0
+$$
+Where $f(x)$ is the forcing term. Our goal is to determine the function $u(x)$ for different
+ forcing terms$f(x)$. In other words, we are trying to determine an
+  operator $G$ such that $G:f \rightarrow u$.
+
+The operator $G$ will be approximated by the branch neural network in the case of
+ the DeepOnet model, $G_{\theta} \approx G$. Where $\theta$ represents the parameter 
+ of the branch NN.
+The model will consist of two neural networks, the branch NN and the trunk NN. 
+
+\subsubsection{Branch Net}
+In the branch net we will consider the forcing force $f(x)$ which we limit to be in a space of polynomial
+$$f(x) \in \mathcal{P}^n(x) =   a_0 + a_1 x + a_2 x^2 + \dots \dots + a_n x^n = \sum_{i=0}^{n} a_i x^i$$ 
+Where $a_i \in \mathbb{R}$ The branch net will take the forcing term $f(x)$ as input and output the approximated function $u(x)$.
+The branch net will be trained to minimize the loss function. In our work, we consider 100 different forcing terms $f(x)$ as the following 
+  
+$$
+branch_{in} =
+\begin{pmatrix}
+f_1(x_1) & f_1(x_2) & f_1(x_3) & \dots & f_1(x_{10})\\
+f_2(x_1) & f_2(x_2) & f_2(x_3) & \dots & f_2(x_{10})\\
+\vdots & \vdots & \vdots & \dots & \vdots\\
+f_{100}(x_1) & f_{100}(x_2) & f_{100}(x_3) & \dots & f_{100}(x_{10})
+\end{pmatrix}
+$$
+Which yields an output of: 
+$$
+branch_{out} = \begin{pmatrix}
+u^{(1)}_1 & u^{(1)}_2 & u^{(1)}_3 & \dots & u^{(1)}_m\\
+u^{(2)}_1 & u^{(2)}_2 & u^{(2)}_3 & \dots & u^{(2)}_m\\
+\vdots & \vdots & \vdots & \dots & \vdots\\
+u^{(100)}_1 & u^{(100)}_2 & u^{(100)}_3 & \dots & u^{(100)}_m\\
+\end{pmatrix}
+$$
+
+
+for each $f_i(x)$ where $i=1, 2, 3, \dots, 100$
+
+
+$$
+G_{\theta}:
+\begin{bmatrix}
+f_i(x_1) & f_i(x_2) & f_i(x_3) & \dots & f_i(x_{10})
+\end{bmatrix}
+\rightarrow
+\begin{bmatrix}
+u^{(i)}_1 & u^{(i)}_2 & u^{(i)}_3 & \dots & u^{(i)}_m
+\end{bmatrix}
+$$
+
+$$
+u_i(x) =
+\begin{bmatrix}
+u^{(i)}_1 & u^{(i)}_2 & u^{(i)}_3 & \dots & u^{(i)}_m
+\end{bmatrix}
+$$
+
+$u_i(x)$ is not yet evaluated at any point. 
+For the evaluation, we will use the output of the trunk neural network.
+
+\subsubsection{Trunk Net}
+The input to the trunk neural network are the points where we want to 
+evaluate the target function $u(x)$ at, and we represent by the following column vector
+
+$$
+trunk_{in} =
+\begin{pmatrix}
+p_1 \\
+p_2 \\
+\vdots \\
+p_{100}
+\end{pmatrix}
+$$
+
+**Note**: I used $p$ instead of $x$, so there is no confusion with between these points and the sensor points.
+
+Since $0 \le x \le 1$, then $0 \le p_j \le 1$ for $j=1, 2, 3, \dots 100$
+
+The trunk neural network will map each point to a higher dimension and in this case we 
+require that the output dimensions of the branch and the trunk networks must be the same. 
+Therefore, the output the trunk neural network is the following.
+
+$$
+trunk_{out} = \begin{pmatrix}
+b^{(1)}_1 & b^{(1)}_2 & b^{(1)}_3 & \dots & b^{(1)}_m\\
+b^{(2)}_1 & b^{(2)}_2 & b^{(2)}_3 & \dots & b^{(2)}_m\\
+\vdots & \vdots & \vdots & \dots & \vdots \\
+b^{(100)}_1 & b^{(100)}_2 & b^{(100)}_3 & \dots & b^{(100)}_m\\
+\end{pmatrix}
+$$
+
+
+For each $p_j$ where $j=1, 2, 3, \dots, 100$,
+
+$$
+\mathbf{NN}_{\text{trunk}}(p_j) = \begin{bmatrix}
+b^{(j)}_1 & b^{(j)}_2 & b^{(j)}_3 & \dots & b^{(j)}_m
+\end{bmatrix}
+$$
+
+\subsubsection{Evaluation}
+To evaluate the output $u_i$ at the trunk points,
+we take the dot product of the branch output and the trunk output and that is why we require the
+output dimensions of both networks to be the same. For example,
+to evaluate $G(f_i)$ at $p_j$ we perform the following operation
+
+\begin{multline}
+G_{\theta}(f_i)(p_j) = u_i(p_j) = \\ 
+\begin{bmatrix}
+u^{(i)}_1 & u^{(i)}_2 & u^{(i)}_3 & \dots & u^{(i)}_m
+\end{bmatrix} \cdot 
+\begin{bmatrix} 
+b^{(j)}_1 & b^{(j)}_2 & b^{(j)}_3 & \dots & b^{(j)}_m
+\end{bmatrix}
+= \sum_{n=1}^{m} u^{(i)}_n b^{(j)}_n
+\end{multline}
+
+We are going to use only 1 hidden layer with 32 parameters for both the branch and trunk networks. 
+Also, we will use LBFGS optimizer since it converges to the minimum faster.
+\subsection{RESULTS}
+We trained the model and are going to test it with $f(x)$ to be in the same space that we trained it on
+and on functions outside the domain to see how general the model is.
+
+\textbf{Case 1 - Constant}\\
+For $f(x) = -1$ which is a simple case with an exact solution $u(x) = \frac{1}{2} (x^2 - x)$ we get the following results 
+
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=\textwidth]{pideeponet_case1_result.png}
+    \label{constant_f}
+    \caption[figure1]{difference between the exact solution and the predicted solution for $f(x) = -1$}
+\end{figure}
+
+As we see in \ref*{constant_f}, the max error is very small, and the model 
+was able to predict the solution very well.
+
+\textbf{Case 2 - Quadratic}\\
+In this case, we will consider the following forcing term
+\[ f(x) = x + 3x^2 \] 
+Which has an exact solution of 
+\[u(x) = \dfrac{1}{6} x^3 - \dfrac{1}{4} x^4 + \dfrac{10}{24} x. \] 
+The results are shown in the following figure
+
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=\textwidth]{pideeponet_case2_result.png}
+    \label{quadratic_f}
+    \caption[figure2]{difference between the exact solution and the predicted solution for $f(x) = x + 3x^2$}
+\end{figure}
+
+
+\textbf{Case 3 - Out of Space Functions (Exponential)}\\
+In this case, we will consider the following forcing term
+\[f(x) = e^x\] 
+Which has an exact solution of 
+\[u(x) = - e^x +xe -x + 1\]
+Since the forcing term is from a function space that the model hasn't been trained on, 
+we expect the model to be less accurate. The results are shown in the following figure
+
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=\textwidth]{pideeponet_case3_result.png}
+    \label{exp_f}
+    \caption[figure3]{difference between the exact solution and the predicted solution for $f(x) = e^x$}
+\end{figure}
+
+
+%-------------revison-------------
+% In this work, we have presented the PI-DeepONet method, a novel approach for solving 
+% parametric partial differential equations (PDEs). Our method combines the power of 
+% physics-informed neural networks (PINNs) with DeepOnet, enabling accurate and efficient solutions to 
+% PDEs with high-dimensional parameter spaces. Through extensive experiments, we have demonstrated 
+% the effectiveness of the PI-DeepONet method in predicting the solutions of various parametric PDEs. 
+% Our model exhibits remarkable accuracy, even when tested on functions outside the training space, 
+% indicating its ability to generalize well. The results obtained highlight the potential of the 
+% PI-DeepONet method as a powerful tool for solving complex PDEs.
+% Looking ahead, future research will focus on extending the PI-DeepONet method to higher dimensions and more intricate PDEs. 
+% This will involve exploring advanced architectures and training strategies to handle the increased complexity. Additionally, efforts will be directed towards enhancing the interpretability of the model and investigating its robustness under different scenarios.
+% In conclusion, the PI-DeepONet method represents a significant advancement in the field of PDE solving. Its ability to accurately predict solutions and generalize to unseen functions opens up new possibilities for tackling challenging problems in various scientific and engineering domains.
+%----------------------------------
+
+%-----I will commment this page-------
+%\include{outline.tex}
+%--------------------------------------
 
 %-------references------
-\newpage
+\clearpage
 \singlespacing
 \bibliographystyle{plain}
 \bibliography{ref.bib}
