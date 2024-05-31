@@ -1,4 +1,4 @@
-\documentclass[a4paper, onecolumn, 12pt]{article}
+\documentclass[a4paper,12pt]{article}
 \usepackage[a4paper, total={6in, 8in}]{geometry}
 \usepackage[english]{babel}
 \usepackage[protrusion=true,
@@ -10,9 +10,20 @@
 \usepackage{setspace}
 \usepackage{parskip}
 \usepackage{amsmath}
+\usepackage{amsthm}
 \usepackage{amssymb}
 \usepackage{hyperref}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}[theorem]{lemma}
 \usepackage{float}
+\newcommand{\signed}[1]{%
+  {\unskip\nobreak\hfil\penalty50
+   \hskip2em\hbox{}\nobreak\hfil#1
+   \parfillskip=0pt \finalhyphendemerits=0 \par}
+}
 
 
 \hypersetup{
@@ -99,12 +110,15 @@ and discuss the procedure of approximating ordinary and partial differential equ
 codes that have been used in this section will be available on the GitHub repository 
 \url{https://github.com/HashimAlSadah/MX-Project.git}.
 
+\subsection{Overview}
 Let us first consider a general nonlinear differential equation
-\begin{align}
+\begin{equation}\label{general_PDE}
+\begin{aligned}
 \mathcal{F}(u, \gamma)(\mathbf{x}) = f(\mathbf{x}) \qquad \mathbf{x} \in  \Omega,\\
 \mathcal{B}(u, \gamma)(x, t) = g(t) \qquad x \in \partial{\Omega}, \\
 \mathcal{I}(u, \gamma)(x, t_0) = h(x) \qquad x \in \partial{\Omega_0}
-\end{align}
+\end{aligned}
+\end{equation}
 
 Where $u(\mathbf{x})$ is the unknown function that we are trying to approximate, 
 $\mathbf{x} = [ x_1, x_2, \dots, x_{d-1}, t]$ is the vector of space and time 
@@ -119,6 +133,130 @@ are universal function approximators\cite{hornik1989multilayer}, it means that
 a neural network with at least one hidden layer can approximate a function 
 from a finite dimensional set to another with 
 any arbitrary error given that we use a sufficient number of hidden neuron or units.
+
+\subsection{Universal function approximator theorem}
+In this part, we explore the theoretical aspects of the universal approximator theorem.
+For this part we will follow the definitions and the theorems as stated in the paper 
+by Hornik et al. (1988) and we try to elaborate and explain as much as possible. 
+
+We start by introducing the necessary definitions before stating any theorems.
+
+
+\begin{definition}\label{affine def}
+    For any $r \in \mathbb{N}$, $\mathbf{A}^r$ is the set of all affine functions 
+    from $\mathbb{R}^r$ to $\mathbb{R}$. In other words, it is the set of all functions
+    $A(\mathbf{x}) = \mathbf{w} \cdot \mathbf{x} + b$. Where $\mathbf{x, w} \in \mathbb{R}^r$
+    and $b \in \mathbb{R}$.  \signed{$\square$}
+\end{definition}
+
+
+The affine transformation in Definition \ref{affine def} represents the output of one hidden 
+units before applying any activation function. $\mathbf{x}$ represents the input to the neural 
+network, $\mathbf{w}$ represents the weights between the input and a particular hidden unit, and
+$b$ is the bias term. 
+
+\begin{definition}\label{class of NN}
+    For any Borel measurable function $G(\cdot)$ mapping $\mathbb{R}$
+    to $\mathbb{R}$ and $r \in \mathbb{N}$ define $\sum^r(G)$ to be the class of 
+    functions  
+    \begin{multline*}
+    \biggl\{f: \mathbb{R}^r \rightarrow \mathbb{R} 
+    \, \bigg| \, f(x) = \sum_{j=1}^{q} \beta_j G(A_j(\mathbf{x})), 
+    \mathbf{x} \in \mathbb{R}^r, \beta_j \in \mathbb{R},
+    \\[-0.75em] \mathbf{A}_j \in \mathbf{A}^r,
+    \quad j = 1, 2, \dots
+    \biggr\} \; \square
+    \end{multline*}
+\end{definition}
+
+When the function $G$ is a squashing (activation) function, the class of 
+functions in Definition \ref{class of NN} becomes the class of neural network 
+with one hidden layer with $q$ hidden units. $\beta_j$ are the weights from the 
+hidden layer to the output of the neural network. Next, we define what a 
+squashing (activation) function is.
+
+\begin{definition}\label{general class NN}
+    A function $\Psi : \mathbb{R} \rightarrow [0, 1]$ is a squashing function if 
+    \begin{enumerate}
+        \item It is non-decreasing function.
+        \item $\lim_{\lambda \rightarrow \infty} \Psi(\lambda) = 1$
+        \item $\lim_{\lambda \rightarrow -\infty} \Psi(\lambda) = 0$
+    \end{enumerate}
+    for all $\lambda \in \mathbb{R}$. \signed{$\square$}
+\end{definition}
+
+\begin{definition}
+    For any Borel measurable function $G(\cdot)$ mapping 
+    from $\mathbb{R}$ to $\mathbb{R}$ and $r \in \mathbb{N}$, 
+    define $\sum \prod^r (G)$ to be the class of functions 
+    \begin{multline*}
+        \biggl\{ f: \mathbb{R}^r \rightarrow \mathbb{R} \, \bigg| \, 
+        f(\mathbf{x}) = \sum_{j=1}^{q} \beta_j \cdot \prod_{k=1}^{l_j} G( A_{jk}(\mathbf{x})), 
+        \, \mathbf{x}^r \in \mathbb{R}, \beta_j \in \mathbb{R}, \\[-0.75em] 
+        \mathbf{A}_j \in \mathbf{A}^r, \quad j = 1, 2, \dots
+        \biggr\} \; \square
+    \end{multline*} 
+\end{definition}
+
+The class of functions defined in Definition \ref{general class NN} 
+is more general class of feedforward neural network, so proving that 
+$\sum\prod$ is a class of universal functions approximators is sufficient 
+to show that the same apply to the class $\sum$ since the latter is a special 
+case of the earlier, which can be obtained by setting $l_j = 1$ for all $q$. 
+
+\begin{definition}\label{continuous-measurable funs}
+    Define $C^r$ to be the set of all continuous functions mapping from 
+    $\mathbb{R}^r$ to $\mathbb{R}$ and $M^r$ to be the set of all measurable
+    functions mapping from $\mathbb{R}^r$ to $\mathbb{R}$. Also, denote the 
+    Borel $\sigma$-field of $\mathbb{R}^r$ by $B^r$. \signed{$\square$}
+\end{definition}
+
+Therefore, by Definition \ref{continuous-measurable funs}, if $G$ is any continuous 
+function, then the classes $\sum^{r}(G)$ and $\sum\prod^{r}(G)$ belong to $C^r$. Similarly,
+if $G$ is any Borel measurable function, then the classes $\sum^{r}(G)$ and $\sum\prod^{r}(G)$
+belong to $M^r$. 
+
+\textbf{Note:} If a function is continuous then it is measurable, but the converse is 
+not true in general.
+
+The closeness of functions $f, g \in C^r$  or $f, g \in M^r$ is measured by 
+some metric $\rho$ on $C^r$ or $M^r$. The closeness of one class of functions 
+to another is measured by the concept of denseness, which will be defined next.
+
+\begin{definition}\label{denseness def}
+    A subset $S$ of a metric space $(X, \rho)$ is $\rho$-dense in
+    a subset $T$ if for every $\epsilon > 0$ and for every $t \in T$ 
+    there exists $s \in S$ such $\rho(s, t) < \epsilon$. \signed{$\square$}
+\end{definition}
+
+Definition \ref{denseness def} implies that an element of $S$ can approximate 
+an element of $T$ to any desired degree of accuracy. In our case, $X$ and $T$ 
+represent $C^r$ or $M^r$, and $S$ represents $\sum^{r}(G)$ or $\sum\prod^{r}(G)$.
+
+Before introducing the main theorem, we need one last definition since we would 
+like to show that $\sum^{r}(G)$ and $\sum\prod^{r}(G)$ are uniformly dense on 
+a compacta in $C^r$ or $M^r$.
+
+\begin{definition}
+    A subset $S$ of $C^r$ is uniformly dense on a compacta in $C^r$
+    if for every compact subset $K \subset \mathbb{R}^r$ S is $\rho_K$-dense
+    in $C^r$. Where 
+    $$\rho_K(f, g) \equiv sup_{x \in K} \left| f(x) - g(x) \right|, 
+    \quad \text{for all } f, g \in C^r
+    $$
+    A sequence of functions ${f_n}$ converges to a function $f$ 
+    uniformly on compacta if for all compact $K \subset \mathbb{R}^r$
+    $\rho_K(f_n, f) \rightarrow 0$ as $n \rightarrow \infty$. 
+    \signed{$\square$} 
+\end{definition}
+
+\begin{theorem}
+    Let $G: \mathbb{R} \rightarrow \mathbb{R}$ be any continuous non-constant 
+    function. Then $\sum\prod^r(G)$ is uniformly dense on compacta in $C^r$.
+    \signed{$\square$}
+\end{theorem}
+\newpage
+\subsection{Training PINN}
 Therefore, the target function $u(\mathbf{x})$ can be approximated with a neural network,
 $$
 u_{\theta}(\mathbf{x}) \approx u(\mathbf{x})
@@ -671,18 +809,13 @@ solutions, which indicates a global error of the order $10^3$. The details of th
 
 \clearpage
 \section{PI-DeepOnet}
-Physics Informed Deep Neural Operator (PI-DeepONet) is a new method of solving
-partial differential equations (PDEs) using deep learning. This method is
-based on the combination of the Physics Informed Neural Networks (PINNs)
-and the DeepONet. PINNs are a class of neural networks that are trained
-to solve PDEs by enforcing the PDEs as a loss function. DeepONet is
-a deep learning architecture that is used to solve PDEs by learning
-the solution operator. PI-DeepONet is a combination of these two 
-methods, which allows for the solution of PDEs with fewer data and 
-computational cost. This part
-will provide an overview of the PI-DeepONet method and its applications.
+Physics Informed Deep Neural Operator (PI-DeepONet) is a DNN model for approximating  
+the solutions of parametric partial differential equations (PDEs) where it incorporates 
+physics informed knowledge in the architecture of the DeepONet model.
+DeepONet is a neural network architecture used to learn
+an operator between infinite dimensional function spaces. 
 
-In this section, we provide a concise overview of the DeepONet model architecture \cite{wang2021learning}, 
+This section provides a concise overview of the DeepONet model architecture \cite{wang2021learning}, 
 focusing specifically on the learning of solution operators for parametric Partial Differential Equations
 (PDEs). The term "parametric PDEs" refers to PDE systems where certain parameters are permitted to vary 
 within a specified range. These parameters could include factors such as the shape of the physical domain,
@@ -693,10 +826,20 @@ $N(u, s) = 0$ \cite{wang2021learning} where $u \in U$ represents the parameters 
 and $s \in S$ is the corresponding unknown solution to the PDE system. It is assumed that for any
 $u \in U$, there exists a unique solution $s = s(u) \in U$ to the equation $N(u, s) = 0$ (subject to
 appropriate initial and boundary conditions). Consequently, a solution operator $G: U \rightarrow S$ 
-is defined as $G(u) = s(u)$. Following the original formulation by Lu et al. \cite{wang2021learning}, 
+is defined as $G(u) = s(u)$. 
+
+Following the original formulation by Lu et al. \cite{wang2021learning}, 
 we represent the solution map $G$ using an unstacked DeepONet denoted as $G_{\theta}$, where $\theta$ 
-encompasses all trainable parameters of the DeepONet network. As depicted in Figure 1, the unstacked
-DeepONet comprises two separate neural networks, known as the "branch net" and "trunk net", respectively. 
+encompasses all trainable parameters of the DeepONet network. As depicted in Figure \ref{DeepONet architecture}
+DeepONet comprises two separate neural networks, known as the "branch net" and "trunk net", respectively.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=300px]{images/DeepOnet.png}
+    \caption{DeepONet architecture}
+    \label{DeepONet architecture}
+\end{figure}
+
 The branch net takes $u$ as input and produces a feature embedding $[b_1, b_2, ..., b_q]^T \in \mathbb{R}^q$
 as output, where $u = [u(x_1), u(x_2), ..., u(x_m)]$ denotes a function $u \in U$ evaluated at a set of 
 fixed locations $\{x_i\}_{i=1}^m$. On the other hand, the trunk net accepts continuous coordinates $y$ as
@@ -719,9 +862,10 @@ $$
 $$
 
 Where $G_{\theta}(f)=u_{\theta}$ and $p_j$ is an input point to the trunk NN.
+
 \subsection{IMPLEMENTATION}
-We will consider the 1D Poisson equation as a case study to 
-illustrate the im\-ple\-men\-ta\-tion of the PI-DeepONet method. The 1D Poisson equation is given by:
+We will consider the 1D Poisson equation as a study case to 
+illustrate the implementation of the PI-DeepONet method. The 1D Poisson equation is given by:
 $$
 -\frac{d^2 u}{d x^2} = f(x), \quad 0 \le x \le 1
 $$
@@ -731,21 +875,30 @@ $$
 u(0) = u(1) = 0
 $$
 Where $f(x)$ is the forcing term. Our goal is to determine the function $u(x)$ for different
- forcing terms$f(x)$. In other words, we are trying to determine an
-  operator $G$ such that $G:f \rightarrow u$.
+forcing terms$f(x)$. In other words, we are trying to determine an
+operator $G$ such that $G:f \rightarrow u$.
 
 The operator $G$ will be approximated by the branch neural network in the case of
- the DeepOnet model, $G_{\theta} \approx G$. Where $\theta$ represents the parameter 
- of the branch NN.
+the DeepOnet model, $G_{\theta} \approx G$. Where $\theta$ represents the parameter 
+of the branch NN.
 The model will consist of two neural networks, the branch NN and the trunk NN. 
 
 \subsubsection{Branch Net}
-In the branch net we will consider the forcing force $f(x)$ which we limit to be in a space of polynomial
-$$f(x) \in \mathcal{P}^n(x) =   a_0 + a_1 x + a_2 x^2 + \dots \dots + a_n x^n = \sum_{i=0}^{n} a_i x^i$$ 
-Where $a_i \in \mathbb{R}$ The branch net will take the forcing term $f(x)$ as input and output the approximated function $u(x)$.
-The branch net will be trained to minimize the loss function. In our work, we consider 100 different forcing terms $f(x)$ as the following 
+In the branch net, we will consider the input to be the forcing term $f(x)$.
+The input function space will be limited to a set of random polynomials of degree 3 
+since it is not possible to implement an infinite function space. The space of polynomials
+of degree 3 is given by 
+
+\begin{equation}
+    \mathcal{P}^n(x) =   a_0 + a_1 x + a_2 x^2 + \dots \dots + a_n x^n = \sum_{i=0}^{n} a_i x^i
+\end{equation} 
+
+Where $a_i \in \mathbb{R}$ and $n$ is the degree of the polynomial.
+
+The branch net will take the forcing term $f(x)$ as input and output the approximated function $u(x)$.
+In our work, we consider 100 different forcing terms $f(x)$ as the following 
   
-$$
+\begin{equation}
 branch_{in} =
 \begin{pmatrix}
 f_1(x_1) & f_1(x_2) & f_1(x_3) & \dots & f_1(x_{10})\\
@@ -753,22 +906,19 @@ f_2(x_1) & f_2(x_2) & f_2(x_3) & \dots & f_2(x_{10})\\
 \vdots & \vdots & \vdots & \dots & \vdots\\
 f_{100}(x_1) & f_{100}(x_2) & f_{100}(x_3) & \dots & f_{100}(x_{10})
 \end{pmatrix}
-$$
+\end{equation}
+
 Which yields an output of: 
-$$
+\begin{equation}
 branch_{out} = \begin{pmatrix}
 u^{(1)}_1 & u^{(1)}_2 & u^{(1)}_3 & \dots & u^{(1)}_m\\
 u^{(2)}_1 & u^{(2)}_2 & u^{(2)}_3 & \dots & u^{(2)}_m\\
 \vdots & \vdots & \vdots & \dots & \vdots\\
 u^{(100)}_1 & u^{(100)}_2 & u^{(100)}_3 & \dots & u^{(100)}_m\\
 \end{pmatrix}
-$$
+\end{equation}
 
-
-for each $f_i(x)$ where $i=1, 2, 3, \dots, 100$
-
-
-$$
+\begin{equation}
 G_{\theta}:
 \begin{bmatrix}
 f_i(x_1) & f_i(x_2) & f_i(x_3) & \dots & f_i(x_{10})
@@ -777,14 +927,15 @@ f_i(x_1) & f_i(x_2) & f_i(x_3) & \dots & f_i(x_{10})
 \begin{bmatrix}
 u^{(i)}_1 & u^{(i)}_2 & u^{(i)}_3 & \dots & u^{(i)}_m
 \end{bmatrix}
-$$
+\end{equation}
 
-$$
+for each $f_i(x)$ where $i=1, 2, 3, \dots, 100$
+\begin{equation}
 u_i(x) =
 \begin{bmatrix}
 u^{(i)}_1 & u^{(i)}_2 & u^{(i)}_3 & \dots & u^{(i)}_m
 \end{bmatrix}
-$$
+\end{equation}
 
 $u_i(x)$ is not yet evaluated at any point. 
 For the evaluation, we will use the output of the trunk neural network.
@@ -793,7 +944,7 @@ For the evaluation, we will use the output of the trunk neural network.
 The input to the trunk neural network are the points where we want to 
 evaluate the target function $u(x)$ at, and we represent by the following column vector
 
-$$
+\begin{equation}
 trunk_{in} =
 \begin{pmatrix}
 p_1 \\
@@ -801,33 +952,33 @@ p_2 \\
 \vdots \\
 p_{100}
 \end{pmatrix}
-$$
+\end{equation}
 
-**Note**: I used $p$ instead of $x$, so there is no confusion with between these points and the sensor points.
+\textbf{Note}:  We used $p$ instead of $x$, so there is no confusion with between these points and the sensor points.
 
 Since $0 \le x \le 1$, then $0 \le p_j \le 1$ for $j=1, 2, 3, \dots 100$
 
-The trunk neural network will map each point to a higher dimension and in this case we 
+The trunk neural network will map each point to a higher dimension and in this case, we 
 require that the output dimensions of the branch and the trunk networks must be the same. 
-Therefore, the output the trunk neural network is the following.
+Therefore, the output of the trunk neural network is the following.
 
-$$
+\begin{equation}
 trunk_{out} = \begin{pmatrix}
 b^{(1)}_1 & b^{(1)}_2 & b^{(1)}_3 & \dots & b^{(1)}_m\\
 b^{(2)}_1 & b^{(2)}_2 & b^{(2)}_3 & \dots & b^{(2)}_m\\
 \vdots & \vdots & \vdots & \dots & \vdots \\
 b^{(100)}_1 & b^{(100)}_2 & b^{(100)}_3 & \dots & b^{(100)}_m\\
 \end{pmatrix}
-$$
+\end{equation}
 
 
 For each $p_j$ where $j=1, 2, 3, \dots, 100$,
 
-$$
+\begin{equation}
 \mathbf{NN}_{\text{trunk}}(p_j) = \begin{bmatrix}
 b^{(j)}_1 & b^{(j)}_2 & b^{(j)}_3 & \dots & b^{(j)}_m
 \end{bmatrix}
-$$
+\end{equation}
 
 \subsubsection{Evaluation}
 To evaluate the output $u_i$ at the trunk points,
@@ -895,20 +1046,42 @@ we expect the model to be less accurate. The results are shown in the following 
     \caption[figure3]{difference between the exact solution and the predicted solution for $f(x) = e^x$}
 \end{figure}
 
+\section{Conclusion}
+The project shows the ability of Neural networks with different architecture
+to approximate the solutions of PDEs. We explored the physics informed 
+neural network (PINN) model to approximate the solutions for a nonlinear 
+PDE (Burgers equation) and a linear PDE (diffusion equation) and the results 
+match the reference solution with an acceptable accuracy. Furthermore, we 
+implemented the two variations of PINN, which are the time-continuous model and
+the time-discrete model, where the latter utilizes Runge-Kutta to discrete the 
+temporal part of the PDE and thus reducing the number of input data to the neural network.
+Finally, we looked into the physics informed DeepONet model, which approximates the solutions 
+of parametric PDEs by learning a functional between two infinite dimensional function space. 
+For this model, we only considered the time independent (one-dimensional) Poisson equation.
+Despite the promise that Deep Learning methods show for approximating PDEs, they have certain 
+limitations such as the need for a large amount of training points, especially for high dimensional
+and multi-physics problems, the low accuracy of the approximated solution, and the long training time for 
+neural network model.
 
-%-------------revison-------------
-% In this work, we have presented the PI-DeepONet method, a novel approach for solving 
-% parametric partial differential equations (PDEs). Our method combines the power of 
-% physics-informed neural networks (PINNs) with DeepOnet, enabling accurate and efficient solutions to 
-% PDEs with high-dimensional parameter spaces. Through extensive experiments, we have demonstrated 
-% the effectiveness of the PI-DeepONet method in predicting the solutions of various parametric PDEs. 
-% Our model exhibits remarkable accuracy, even when tested on functions outside the training space, 
-% indicating its ability to generalize well. The results obtained highlight the potential of the 
-% PI-DeepONet method as a powerful tool for solving complex PDEs.
-% Looking ahead, future research will focus on extending the PI-DeepONet method to higher dimensions and more intricate PDEs. 
-% This will involve exploring advanced architectures and training strategies to handle the increased complexity. Additionally, efforts will be directed towards enhancing the interpretability of the model and investigating its robustness under different scenarios.
-% In conclusion, the PI-DeepONet method represents a significant advancement in the field of PDE solving. Its ability to accurately predict solutions and generalize to unseen functions opens up new possibilities for tackling challenging problems in various scientific and engineering domains.
-%----------------------------------
+\section*{Future Work}
+Due to the time limit of this project we could not explore other interesting aspects 
+of deep learning methods for approximating PDEs, so we suggest here few directions 
+to continue the project.
+\begin{itemize}
+    \item Using PINNs to solve a multi-physics problems such as 
+    the cavity flow problem represented by the Navier-Stocks equations or high dimensional ones 
+    like many-body problems (for example, the simulation of electron gas).
+    
+    \item Implement the DeepONet to solve parametric PDEs such as approximating the 
+    solution for burgers equation with different boundary or initial conditions.
+
+    \item  Using deep learning methods to approximate the solution of PDEs with irregular 
+    and complex geometry.
+
+    \item Combining classical and deep learning approaches to create more robust methods.
+\end{itemize}
+ 
+
 
 %-----I will commment this page-------
 %\include{outline.tex}

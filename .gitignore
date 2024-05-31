@@ -9,3 +9,4 @@ project_report/*.fls
 .DS_Store
 project_report/.vscode/
 project_report/main.blg
+.vscode
