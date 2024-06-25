@@ -110,7 +110,7 @@ and discuss the procedure of approximating ordinary and partial differential equ
 codes that have been used in this section will be available on the GitHub repository 
 \url{https://github.com/HashimAlSadah/MX-Project.git}.
 
-\subsection{Overview}
+\subsection{Overview}\label{pinn overview}
 Let us first consider a general nonlinear differential equation
 \begin{equation}\label{general_PDE}
 \begin{aligned}
@@ -134,7 +134,7 @@ a neural network with at least one hidden layer can approximate a function
 from a finite dimensional set to another with 
 any arbitrary error given that we use a sufficient number of hidden neuron or units.
 
-\subsection{Universal function approximator theorem}
+\subsection{The universal function approximator theorem}
 In this part, we explore the theoretical aspects of the universal approximator theorem.
 For this part we will follow the definitions and the theorems as stated in the paper 
 by Hornik et al. (1988) and we try to elaborate and explain as much as possible. 
@@ -169,23 +169,23 @@ $b$ is the bias term.
     \end{multline*}
 \end{definition}
 
-When the function $G$ is a squashing (activation) function, the class of 
+When the function $G$ is an activation function, the class of 
 functions in Definition \ref{class of NN} becomes the class of neural network 
 with one hidden layer with $q$ hidden units. $\beta_j$ are the weights from the 
 hidden layer to the output of the neural network. Next, we define what a 
 squashing (activation) function is.
 
-\begin{definition}\label{general class NN}
-    A function $\Psi : \mathbb{R} \rightarrow [0, 1]$ is a squashing function if 
-    \begin{enumerate}
-        \item It is non-decreasing function.
-        \item $\lim_{\lambda \rightarrow \infty} \Psi(\lambda) = 1$
-        \item $\lim_{\lambda \rightarrow -\infty} \Psi(\lambda) = 0$
-    \end{enumerate}
-    for all $\lambda \in \mathbb{R}$. \signed{$\square$}
-\end{definition}
+% \begin{definition}\label{general class NN}
+%     A function $\Psi : \mathbb{R} \rightarrow [0, 1]$ is a squashing function if 
+%     \begin{enumerate}
+%         \item It is non-decreasing function.
+%         \item $\lim_{\lambda \rightarrow \infty} \Psi(\lambda) = 1$
+%         \item $\lim_{\lambda \rightarrow -\infty} \Psi(\lambda) = 0$
+%     \end{enumerate}
+%     for all $\lambda \in \mathbb{R}$. \signed{$\square$}
+% \end{definition}
 
-\begin{definition}
+\begin{definition}\label{general class NN}
     For any Borel measurable function $G(\cdot)$ mapping 
     from $\mathbb{R}$ to $\mathbb{R}$ and $r \in \mathbb{N}$, 
     define $\sum \prod^r (G)$ to be the class of functions 
@@ -250,19 +250,65 @@ a compacta in $C^r$ or $M^r$.
     \signed{$\square$} 
 \end{definition}
 
-\begin{theorem}
+To prove that $\sum\prod(G)$ for any continuous non-constant $G$ is uniformly 
+dense on compacta in $C^r$, we need to use Stone-Weierstrass theorem, which is the following.
+
+\begin{theorem}[Stone-Weierstrass theorem]
+    \label{Stone-Weierstrass}
+    Let $\mathbf{A}$ be algebra of real continuous functions on a compact 
+    set $K$. If $\mathbf{A}$ separates points on $K$ and $\mathbf{A}$ vanishes 
+    at no point of $K$, then the uniform closure $\mathbf{B}$ of $\mathbf{A}$
+    consists of all real continuous functions on $K$. That is, $\mathbf{A}$ is $\rho_K$-dense 
+    in the space of all real continuous on $K$. \signed{$\square$}
+\end{theorem}
+
+\begin{theorem}\label{uni fun approx}
     Let $G: \mathbb{R} \rightarrow \mathbb{R}$ be any continuous non-constant 
     function. Then $\sum\prod^r(G)$ is uniformly dense on compacta in $C^r$.
     \signed{$\square$}
 \end{theorem}
-Which says that \(\sum \prod (G)\) that is the feed-forward network is capable of accurately approximating any real-valued continuous function over a compact set. \cite{hornik1989multilayer}
-\newpage
+
+\textbf{Proof:}
+
+Let $K \subset \mathbb{R}^r$ be a compact set and apply Stone-Weierstrass theorem.
+This means that for any continuous non-constant $G$, $\sum\prod^r(G)$ is an algebra on $K$.
+If $\mathbf{x}, \mathbf{y} \in K$ and $\mathbf{x} \neq \mathbf{y}$ then 
+there exists $A \in \mathbf{A}^r$ such that $G(A(\mathbf{x})) \neq G(A(\mathbf{y}))$.
+
+To see this, choose $a, b \in \mathbb{R}$ such that $a \neq b$ and $G(a) \neq G(b)$.
+Also, choose $A(\cdot)$ such that $A(\mathbf{\mathbf{x}}) = a$ and $A(\mathbf{\mathbf{y}}) = b$. 
+Then $G(A(\mathbf{x})) \neq G(A(\mathbf{y}))$, which ensures that $\sum\prod^r(G)$ is separating on $K$.
+
+Next, there are $G(A(\cdot))$'s that are constant and not equal to zero. To see this, 
+choose $b \in \mathbb{R}$ such that $G(b) \neq 0$ and set $A(\mathbf{x}) = \mathbf{0} \cdot \mathbf{x} + b$. 
+The for all $\mathbf{x} \in K$, $G(A(\mathbf{x})) = G(b)$, which ensures that $\sum\prod^r(G)$ vanishes at no 
+point of $K$.
+
+Therefore, Stone-Weierstrass theorem implies that $\sum\prod^r(G)$ is $\rho_K$-dense on in the space 
+of real continuous functions on $K$. \signed{$\square$} 
+
+Theorem \ref{uni fun approx} implies that the class of feedforward neural network $\sum\prod$ is 
+capable of approximating any continuous real-valued function on a compact set with any desired accuracy.
+We notice that the choice of the activation function does not influence the result as long as 
+that function is continuous and non-constant. 
+
+Since Theorem \ref{uni fun approx} holds true for $\sum\prod$, then it also holds for the class of 
+feedforward neural network $\sum$ as it is a special case of the earlier ($l_j = 1$), which proves 
+our claim that a shallow neural network with one layer is capable of approximating any real-valued 
+function with an arbitrary degree of accuracy given a sufficient number of hidden units.
+
+The paper by Hornik et al. (1988) extends the result beyond the approximation of any real-valued 
+function to any measurable function. Additionally, they show that the same holds for a multilayer 
+feedforward neural network. Refer to reference \cite{hornik1989multilayer} for further details.
+
+
 \subsection{Training PINN}
-Therefore, the target function $u(\mathbf{x})$ can be approximated with a neural network,
+Following our notation in section \ref{pinn overview} and applying Theorem \ref{uni fun approx},
+we can approximate the target function $u(\mathbf{x})$ by neural network,
 $$
 u_{\theta}(\mathbf{x}) \approx u(\mathbf{x})
 $$ 
-Where $\theta$ represents the parameters of the neural network, which consists of
+Where $\theta$ represents the parameters of the neural network, which consist of
 weights and the biases.
 
 As stated earlier, a neural network is composed of input layer, 
@@ -809,7 +855,7 @@ solutions, which indicates a global error of the order $10^3$. The details of th
 \end{figure}
 
 \clearpage
-\section{PI-DeepOnet}
+\section{PI-DeepONet}
 Physics Informed Deep Neural Operator (PI-DeepONet) is a DNN model for approximating  
 the solutions of parametric partial differential equations (PDEs) where it incorporates 
 physics informed knowledge in the architecture of the DeepONet model.
@@ -836,7 +882,7 @@ DeepONet comprises two separate neural networks, known as the "branch net" and "
 
 \begin{figure}
     \centering
-    \includegraphics[width=300px]{images/DeepOnet.png}
+    \includegraphics[width=300px]{images/DeepONet.png}
     \caption{DeepONet architecture}
     \label{DeepONet architecture}
 \end{figure}
@@ -880,7 +926,7 @@ forcing terms$f(x)$. In other words, we are trying to determine an
 operator $G$ such that $G:f \rightarrow u$.
 
 The operator $G$ will be approximated by the branch neural network in the case of
-the DeepOnet model, $G_{\theta} \approx G$. Where $\theta$ represents the parameter 
+the DeepONet model, $G_{\theta} \approx G$. Where $\theta$ represents the parameter 
 of the branch NN.
 The model will consist of two neural networks, the branch NN and the trunk NN. 
 
@@ -1009,7 +1055,7 @@ For $f(x) = -1$ which is a simple case with an exact solution $u(x) = \frac{1}{2
 
 \begin{figure}[H]
     \centering 
-    \includegraphics[width=\textwidth]{pideeponet_case1_result.png}
+    \includegraphics[width=\textwidth]{piDeepONet_case1_result.png}
     \label{constant_f}
     \caption[figure1]{difference between the exact solution and the predicted solution for $f(x) = -1$}
 \end{figure}
@@ -1026,7 +1072,7 @@ The results are shown in the following figure
 
 \begin{figure}[H]
     \centering 
-    \includegraphics[width=\textwidth]{pideeponet_case2_result.png}
+    \includegraphics[width=\textwidth]{piDeepONet_case2_result.png}
     \label{quadratic_f}
     \caption[figure2]{difference between the exact solution and the predicted solution for $f(x) = x + 3x^2$}
 \end{figure}
@@ -1042,7 +1088,7 @@ we expect the model to be less accurate. The results are shown in the following 
 
 \begin{figure}[H]
     \centering 
-    \includegraphics[width=\textwidth]{pideeponet_case3_result.png}
+    \includegraphics[width=\textwidth]{piDeepONet_case3_result.png}
     \label{exp_f}
     \caption[figure3]{difference between the exact solution and the predicted solution for $f(x) = e^x$}
 \end{figure}
