@@ -1,7 +1,7 @@
 project_report/*.aux
 project_report/*.log
 project_report/*.out
-project_report/*.pdf
+project_report/main.pdf
 project_report/*.bbl
 project_report/*.gz
 project_report/*.fdb_latexmk

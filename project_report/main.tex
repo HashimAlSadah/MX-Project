@@ -50,64 +50,63 @@ researchers are starting to use deep neural networks (DNN) to approximate the so
 Different models have been developed to perform this task such as Physics-Informed Neural Networks (PINNs) 
 and Neural Operator. The speed and the efficiency of these models can surpass other common solvers 
 such as Finite Elements (FM), Finite Difference (FD), and spectral methods in certain cases. 
-In this project, we will utilize these deep learning models to solve an industry-related problem that 
-requires PDEs approximation and compare the accuracy of the used method against 
-experimental or simulated data obtained through other available solvers.
+In this project, we will explore different models of DNN, including their theoretical background and implementation.
+Furthermore, the models will be used to approximate the solution of various differential equations.
 
 \section{Introduction}
-Due to the increase power of computation and the success of deep learning models to 
-solve different problems in various fields such
+Due to the increased power of computation and the success of deep learning models in 
+solving different problems in various fields, such
 as computer vision\cite{chai2021deep}, pattern recognition\cite{serey2023pattern}, 
 and natural language and speech processing\cite{NLPChai}, 
-researchers were inspired to apply deep neural network to solve problems in the field of scientific computing. 
-One of the common and challenging problems is the problem of solving partial differential equations (PDEs).
-Different systems and processes are modelled by PDEs whether it is a natural system such as 
-modelling a biological or a physical phenomena\cite{grossmann2023can,beck2020overview}, or whether it is not a natural system such as
-simulating socioeconomic or financial models\cite{beck2020overview}. Deep learning-based PDEs solver surpass classical methods such as 
+researchers were motivated to apply deep neural networks to solve problems in the field of scientific computing. 
+One of the widely known and challenging problems is the problem of solving partial differential equations (PDEs).
+Different systems and processes are modeled by PDEs, whether it is a natural system such as 
+modeling biological and physical phenomena\cite{grossmann2023can,beck2020overview}, or whether it is not a natural system such as
+simulating socioeconomic or financial models\cite{beck2020overview}. Deep learning-based PDEs solvers can surpass classical methods such as 
 finite element or finite difference in certain cases\cite{grossmann2023can}. 
-One of them is the case of high dimensional PDEs since classical solvers require discretizing the PDEs' domain into a mesh, 
-which causes the number of computations to increase exponentially with the increase of the dimensions and this is known as the curse of dimensionality. 
-On the other hand, deep learning models are mesh-free models, and they only require training data from the PDEs domain. 
-Other situations where deep neural networks exceeds the traditional solvers is when the PDE is 
-nonlinear or non-smooth, which makes it difficult to discretize\cite{grossmann2023can}. 
+One of them is the case of high-dimensional PDEs, where classical solvers require discretizing the PDEs’ domain into a mesh, 
+causing the number of computations to increase exponentially with the increase of the dimensions, and this is known as the curse.
+On the other hand, deep learning models are mesh-free, so they only require training data from the PDEs domain. 
+Moreover, deep learning methods are easy to implement and do not require complicated mathematical 
+analysis compared to traditional methods such as finite element method.\cite{grossmann2023can}. 
 
 Physics-informed Neural Network (PINN) is the most basic and widely used model for approximating PDEs' solutions. 
-PINN is unsupervised learning model since it does not require any 
-labelled data to learn the approximated function or solution\cite{cuomo2022scientific}.
-Despite being unsupervised technique, it is possible to include experimental data along with the physical prior knowledge
+PINN is an unsupervised learning model since it does not require any 
+labeled data to learn the approximated function or solution\cite{cuomo2022scientific}.
+Despite being an unsupervised technique, it is possible to include experimental data, along with the physical prior knowledge
 in order to guide the neural network to the optimal approximation by reducing the 
 number of admissible solutions to the problem\cite{hao2022physics,raissi2019physics}.
 Similar to the fully connected neural network, the physics-informed neural network consists of 
-an input layer, hidden layers, and an output layer. First, the input layer is used to feed 
-the training data into the neural network.  Then, the hidden layers map the data to higher dimensions though 
-a series of linear transformation followed by a nonlinear activation function. 
+an input layer, hidden layers, and an output layer. First, the input layer feeds 
+the training data into the neural network.  Then, the hidden layers map the data to higher dimensions through 
+a series of linear transformations followed by a nonlinear activation function. 
 Finally, the hidden layers map the data to the output layer, which provides the output of the approximated function. 
-The physics-informed neural network (PINN) updates the learning parameters by minimizing a loss function that takes 
-into account the losses due the boundary and initial conditions as well as the PDEs' residual. 
+Physics-informed neural networks (PINNs) update the learning parameters by minimizing a loss function that takes 
+into account the losses due to the boundary and initial conditions as well as the PDEs' residual. 
 After the training process, the neural network should be able to approximate a function that obeys the laws provided by the PDEs. 
 Therefore, the procedure of including the PDEs' residual helps to restrict the number of possible solutions\cite{cuomo2022scientific}. 
 
-Another famous model, which has been developed recently, is the Neural Operator model. 
+Another famous model which has been developed recently is the Neural Operator model. 
 What makes neural operators different from physics-informed neural networks (PINNs) is that the former 
-learns a mapping between infinite function spaces unlike PINN where the mapping occurs between finite spaces or sets. 
-This enables neural operators to learn an operator instead of a function and hence the name Neural Operator.
+learns a mapping between infinite function spaces, unlike PINN where the mapping occurs between finite spaces or sets. 
+This enables neural operators to approximate an operator instead of a function, hence the name Neural Operator.
 The key difference between PINN and neural operators in terms of architecture is that the 
 hidden layers in neural operators consist of linear operators, usually integral operators, 
 followed by a nonlinear activation function. 
-Therefore, neural operators are considered a generalization of physics-informed neural network\cite{kovachki2021neural}.
+Therefore, neural operators are considered a generalization of physics-informed neural networks\cite{kovachki2021neural}.
 
 Overall, deep learning methods for PDEs are powerful solvers. 
-They have the potential for resolving various problems and challenges faced by the classical methods. 
-The advantage of neural networks models is that they are mesh-free methods, which enables them to approximate 
+They have the potential to resolve various problems and challenges faced by the classical methods. 
+The advantage of neural network-based models is that they are mesh-free methods, which enables them to approximate 
 the solution for nonlinear, non-smooth, and high dimensional PDEs without suffering from the cures of dimensionality.
-Furthermore, they utilize the algorithm of automatic differentiation to compute the residual of the PDEs. 
+Furthermore, they utilize the automatic differentiation algorithm to compute the residual of the PDEs. 
 The algorithm is implemented by the majority of deep learning libraries, 
 which makes the overall implementation process simple and easy. 
 
 \section{PINN}
-In this section, we develop some mathematical notation to use throughout the project, 
-and discuss the procedure of approximating ordinary and partial differential equations. All the 
-codes that have been used in this section will be available on the GitHub repository 
+In this section, we develop some mathematical notation that we will use throughout the project, 
+and discuss the procedure of approximating ordinary and partial differential equations. 
+All the codes for the obtained results in this section will be available in the GitHub repository 
 \url{https://github.com/HashimAlSadah/MX-Project.git}.
 
 \subsection{Overview}\label{pinn overview}
@@ -124,22 +123,22 @@ Where $u(\mathbf{x})$ is the unknown function that we are trying to approximate,
 $\mathbf{x} = [ x_1, x_2, \dots, x_{d-1}, t]$ is the vector of space and time 
 in the domain $\Omega \subset \mathbb{R}^d$  with boundary $\partial{\Omega}$, 
 $\gamma$ are parameters related to the problem, $\mathcal{F}$ is the nonlinear 
-differential operator, $\mathcal{B}$ is the boundary conditions, $\mathcal{I}$ is 
-the initial conditions, and $f(\mathbf{x})$, $g(t)$, and $h(x)$ are specified 
+differential operator, $\mathcal{B}$ is the boundary condition, $\mathcal{I}$ is 
+the initial condition, and $f(\mathbf{x})$, $g(t)$, and $h(x)$ are specified 
 functions for a certain problem. 
 
 Since it is established that multilayer feedforward neural networks 
-are universal function approximators\cite{hornik1989multilayer}, it means that 
+are universal function approximators\cite{hornik1989multilayer}, this means that 
 a neural network with at least one hidden layer can approximate a function 
-from a finite dimensional set to another with 
-any arbitrary error given that we use a sufficient number of hidden neuron or units.
+from a finite dimensional set to another with any arbitrary error 
+given that we use a sufficient number of hidden neurons or units.
 
 \subsection{The universal function approximator theorem}
 In this part, we explore the theoretical aspects of the universal approximator theorem.
-For this part we will follow the definitions and the theorems as stated in the paper 
-by Hornik et al. (1988) and we try to elaborate and explain as much as possible. 
+We will follow the definitions and the theorems stated in the paper 
+by Hornik et al. (1988) and try to elaborate and explain as much as possible. 
 
-We start by introducing the necessary definitions before stating any theorems.
+We start by introducing the necessary definitions before stating any theorem.
 
 
 \begin{definition}\label{affine def}
@@ -151,7 +150,7 @@ We start by introducing the necessary definitions before stating any theorems.
 
 
 The affine transformation in Definition \ref{affine def} represents the output of one hidden 
-units before applying any activation function. $\mathbf{x}$ represents the input to the neural 
+unit before applying any activation function. $\mathbf{x}$ represents the input to the neural 
 network, $\mathbf{w}$ represents the weights between the input and a particular hidden unit, and
 $b$ is the bias term. 
 
@@ -171,7 +170,7 @@ $b$ is the bias term.
 
 When the function $G$ is an activation function, the class of 
 functions in Definition \ref{class of NN} becomes the class of neural network 
-with one hidden layer with $q$ hidden units. $\beta_j$ are the weights from the 
+with one hidden layer and $q$ hidden units. $\beta_j$ are the weights from the 
 hidden layer to the output of the neural network. Next, we define what a 
 squashing (activation) function is.
 
@@ -199,7 +198,7 @@ squashing (activation) function is.
 \end{definition}
 
 The class of functions defined in Definition \ref{general class NN} 
-is more general class of feedforward neural network, so proving that 
+is a more general class of feedforward neural network, so proving that 
 $\sum\prod$ is a class of universal functions approximators is sufficient 
 to show that the same apply to the class $\sum$ since the latter is a special 
 case of the earlier, which can be obtained by setting $l_j = 1$ for all $q$. 
@@ -216,7 +215,7 @@ function, then the classes $\sum^{r}(G)$ and $\sum\prod^{r}(G)$ belong to $C^r$.
 if $G$ is any Borel measurable function, then the classes $\sum^{r}(G)$ and $\sum\prod^{r}(G)$
 belong to $M^r$. 
 
-\textbf{Note:} If a function is continuous then it is measurable, but the converse is 
+\textbf{Note:} If a function is continuous, then it is measurable, but the converse is 
 not true in general.
 
 The closeness of functions $f, g \in C^r$  or $f, g \in M^r$ is measured by 
@@ -250,7 +249,7 @@ a compacta in $C^r$ or $M^r$.
     \signed{$\square$} 
 \end{definition}
 
-To prove that $\sum\prod(G)$ for any continuous non-constant $G$ is uniformly 
+To prove that $\sum\prod(G)$, for any continuous non-constant $G$, is uniformly 
 dense on compacta in $C^r$, we need to use Stone-Weierstrass theorem, which is the following.
 
 \begin{theorem}[Stone-Weierstrass theorem]
@@ -272,7 +271,7 @@ dense on compacta in $C^r$, we need to use Stone-Weierstrass theorem, which is t
 
 Let $K \subset \mathbb{R}^r$ be a compact set and apply Stone-Weierstrass theorem.
 This means that for any continuous non-constant $G$, $\sum\prod^r(G)$ is an algebra on $K$.
-If $\mathbf{x}, \mathbf{y} \in K$ and $\mathbf{x} \neq \mathbf{y}$ then 
+If $\mathbf{x}, \mathbf{y} \in K$ and $\mathbf{x} \neq \mathbf{y}$, then 
 there exists $A \in \mathbf{A}^r$ such that $G(A(\mathbf{x})) \neq G(A(\mathbf{y}))$.
 
 To see this, choose $a, b \in \mathbb{R}$ such that $a \neq b$ and $G(a) \neq G(b)$.
@@ -281,10 +280,10 @@ Then $G(A(\mathbf{x})) \neq G(A(\mathbf{y}))$, which ensures that $\sum\prod^r(G
 
 Next, there are $G(A(\cdot))$'s that are constant and not equal to zero. To see this, 
 choose $b \in \mathbb{R}$ such that $G(b) \neq 0$ and set $A(\mathbf{x}) = \mathbf{0} \cdot \mathbf{x} + b$. 
-The for all $\mathbf{x} \in K$, $G(A(\mathbf{x})) = G(b)$, which ensures that $\sum\prod^r(G)$ vanishes at no 
+Then for all $\mathbf{x} \in K$, $G(A(\mathbf{x})) = G(b)$, which ensures that $\sum\prod^r(G)$ vanishes at no 
 point of $K$.
 
-Therefore, Stone-Weierstrass theorem implies that $\sum\prod^r(G)$ is $\rho_K$-dense on in the space 
+Therefore, Stone-Weierstrass theorem implies that $\sum\prod^r(G)$ is $\rho_K$-dense in the space 
 of real continuous functions on $K$. \signed{$\square$} 
 
 Theorem \ref{uni fun approx} implies that the class of feedforward neural network $\sum\prod$ is 
@@ -309,7 +308,7 @@ $$
 u_{\theta}(\mathbf{x}) \approx u(\mathbf{x})
 $$ 
 Where $\theta$ represents the parameters of the neural network, which consist of
-weights and the biases.
+weights and biases.
 
 As stated earlier, a neural network is composed of input layer, 
 hidden layers, and output layer. Therefore, neural network with $L$
@@ -458,7 +457,7 @@ algorithm of stochastic gradient descent.
 
 Figure \ref{absolute diff} shows the difference between the exact solution 
 in Figure \ref{exact diff} and the neural network approximation in Figure \ref{approximation diff}
-where it indicates a global error of order $10^-2$ after 15000 iterations. The code and the simulation
+where it indicates a global error of order $10^{-2}$ after 15000 iterations. The code and the simulation
 details are on \href{https://github.com/HashimAlSadah/MX-Project/blob/main/PINN/continuous_time_model/PDE_diffusion_PINN.ipynb}
 {GitHub}.
 
@@ -492,7 +491,7 @@ This transformation turns the nonlinear Burgers PDE into the heat equation
 \end{equation}
 For the purpose of making the code general when changing the initial conditions (or even the boundary conditions), 
 we are going to use the explicit finite difference (conditionally stable) to approximate the solution for 
-Burgers equation and that approximation will be our reference solution.
+Burgers equation, and that approximation will be our reference solution.
 
 \textbf{Finite difference discretization}\\
 We will discretize the x-dimension into $n$ sub-intervals with $n+1$ points using a step size of $\Delta x = h$
@@ -508,21 +507,21 @@ $$
 For the first derivative in time, we are going to use the forward difference (since it explicit). 
 For the x-axis discretization, we are going to use the central difference for the first and the second derivative.
 $$
-u_t \approx \frac{u_{i,j+1} - u_{i, j-1}}{k}, \quad
+u_t \approx \frac{u_{i,j+1} - u_{i, j}}{k}, \quad
 u_x \approx \frac{ u_{i+1,j} - u_{i-1,j} }{2h}, \quad
 u_x \approx \frac{ u_{i+1,j} - 2 u_{i,j} + u_{i-1,j} }{h^2}
 $$
 
 The discretized equation is the following
 \begin{equation}
-\frac{u_{i,j+1} - u_{i, j-1}}{k} =
+\frac{u_{i,j+1} - u_{i, j}}{k} =
 - u_{i,j} \left( \frac{ u_{i+1,j} - u_{i-1,j} }{2h} \right)
 + \nu \left( \frac{ u_{i+1,j} - 2 u_{i,j} + u_{i-1,j} }{h^2} \right)
 \end{equation}
 
 Rearrange
 \begin{multline}
-u_{i,j+1}  = u_{i, j-1}
+u_{i,j+1}  = u_{i, j}
 - k u_{i,j} \left( \frac{ u_{i+1,j} - u_{i-1,j} }{2h} \right)
 + k \nu \left( \frac{ u_{i+1,j} - 2 u_{i,j} + u_{i-1,j} }{h^2} \right)
 \\ \text{for} \quad i=1, 2, \dots, n-1,  \quad j = 1, 2, \dots
@@ -1095,18 +1094,18 @@ we expect the model to be less accurate. The results are shown in the following 
 
 \section{Conclusion}
 The project shows the ability of Neural networks with different architecture
-to approximate the solutions of PDEs. We explored the physics informed 
+to approximate the solutions of PDEs. We employed physics informed 
 neural network (PINN) model to approximate the solutions for a nonlinear 
-PDE (Burgers equation) and a linear PDE (diffusion equation) and the results 
+PDE (Burgers equation) and a linear PDE (diffusion equation), and the results 
 match the reference solution with an acceptable accuracy. Furthermore, we 
 implemented the two variations of PINN, which are the time-continuous model and
-the time-discrete model, where the latter utilizes Runge-Kutta to discrete the 
+the time-discrete model, where the latter utilizes Runge-Kutta to discretize the 
 temporal part of the PDE and thus reducing the number of input data to the neural network.
 Finally, we looked into the physics informed DeepONet model, which approximates the solutions 
 of parametric PDEs by learning a functional between two infinite dimensional function space. 
 For this model, we only considered the time independent (one-dimensional) Poisson equation.
 Despite the promise that Deep Learning methods show for approximating PDEs, they have certain 
-limitations such as the need for a large amount of training points, especially for high dimensional
+limitations, such as the need for a large amount of training points, especially for high dimensional
 and multi-physics problems, the low accuracy of the approximated solution, and the long training time for 
 neural network model.
 
